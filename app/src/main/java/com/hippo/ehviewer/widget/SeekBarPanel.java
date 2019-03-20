@@ -18,18 +18,18 @@ package com.hippo.ehviewer.widget;
 
 import android.content.Context;
 import android.graphics.Rect;
-import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
-
+import androidx.annotation.NonNull;
 import com.hippo.ehviewer.R;
 import com.hippo.yorozuya.ViewUtils;
 
 public class SeekBarPanel extends LinearLayout {
 
     private SeekBar mSeekBar;
+    private int[] mLocation = new int[2];
 
     public SeekBarPanel(Context context) {
         super(context);
@@ -54,8 +54,9 @@ public class SeekBarPanel extends LinearLayout {
         if (mSeekBar == null) {
             return super.onTouchEvent(event);
         } else {
-            final float offsetX = -mSeekBar.getLeft();
-            final float offsetY = -mSeekBar.getTop();
+            ViewUtils.getLocationInAncestor(mSeekBar, mLocation, this);
+            final float offsetX = -mLocation[0];
+            final float offsetY = -mLocation[1];
             event.offsetLocation(offsetX, offsetY);
             mSeekBar.onTouchEvent(event);
             event.offsetLocation(-offsetX, -offsetY);

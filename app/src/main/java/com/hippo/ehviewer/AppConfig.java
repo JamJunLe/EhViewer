@@ -18,13 +18,11 @@ package com.hippo.ehviewer;
 
 import android.content.Context;
 import android.os.Environment;
-import android.support.annotation.Nullable;
-
+import androidx.annotation.Nullable;
 import com.hippo.ehviewer.client.exception.ParseException;
 import com.hippo.util.ReadableTime;
 import com.hippo.yorozuya.FileUtils;
 import com.hippo.yorozuya.IOUtils;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -37,10 +35,10 @@ public class AppConfig {
     private static final String DOWNLOAD = "download";
     private static final String TEMP = "temp";
     private static final String IMAGE = "image";
-    private static final String CRASH = "crash";
     private static final String PARSE_ERROR = "parse_error";
     private static final String LOGCAT = "logcat";
     private static final String DATA = "data";
+    private static final String CRASH = "crash";
 
     private static Context sContext;
 
@@ -96,11 +94,6 @@ public class AppConfig {
     }
 
     @Nullable
-    public static File getExternalCrashDir() {
-        return getDirInExternalAppDir(CRASH);
-    }
-
-    @Nullable
     public static File getExternalParseErrorDir() {
         return getDirInExternalAppDir(PARSE_ERROR);
     }
@@ -113,6 +106,11 @@ public class AppConfig {
     @Nullable
     public static File getExternalDataDir() {
         return getDirInExternalAppDir(DATA);
+    }
+
+    @Nullable
+    public static File getExternalCrashDir() {
+        return getDirInExternalAppDir(CRASH);
     }
 
     @Nullable
@@ -160,6 +158,21 @@ public class AppConfig {
             // Ignore
         } finally {
             IOUtils.closeQuietly(os);
+        }
+    }
+
+    @Nullable
+    public static File getFilesDir(String name) {
+        File dir = sContext.getFilesDir();
+        if (dir == null) {
+            return null;
+        }
+
+        dir = new File(dir, name);
+        if (dir.isDirectory() || dir.mkdirs()) {
+            return dir;
+        } else {
+            return null;
         }
     }
 }

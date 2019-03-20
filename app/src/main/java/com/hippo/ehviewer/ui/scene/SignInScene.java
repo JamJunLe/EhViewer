@@ -19,9 +19,6 @@ package com.hippo.ehviewer.ui.scene;
 import android.content.Context;
 import android.graphics.Paint;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.design.widget.TextInputLayout;
-import android.support.v7.app.AlertDialog;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,7 +26,10 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
-
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import com.google.android.material.textfield.TextInputLayout;
+import com.hippo.ehviewer.Analytics;
 import com.hippo.ehviewer.EhApplication;
 import com.hippo.ehviewer.R;
 import com.hippo.ehviewer.Settings;
@@ -40,11 +40,13 @@ import com.hippo.ehviewer.client.EhUrl;
 import com.hippo.ehviewer.client.EhUtils;
 import com.hippo.ehviewer.client.parser.ProfileParser;
 import com.hippo.ehviewer.ui.MainActivity;
+import com.hippo.ehviewer.widget.RecaptchaView;
 import com.hippo.scene.Announcer;
 import com.hippo.scene.SceneFragment;
+import com.hippo.util.ExceptionUtils;
+import com.hippo.yorozuya.AssertUtils;
+import com.hippo.yorozuya.IntIdGenerator;
 import com.hippo.yorozuya.ViewUtils;
-
-import junit.framework.Assert;
 
 public final class SignInScene extends SolidScene implements EditText.OnEditorActionListener,
         View.OnClickListener {
@@ -67,6 +69,8 @@ public final class SignInScene extends SolidScene implements EditText.OnEditorAc
     private EditText mUsername;
     @Nullable
     private EditText mPassword;
+    private EditText mRecaptcha;
+    private RecaptchaView mRecaptchaView;
     @Nullable
     private View mRegister;
     @Nullable
@@ -79,7 +83,7 @@ public final class SignInScene extends SolidScene implements EditText.OnEditorAc
     private TextView mSkipSigningIn;
 
     private boolean mSigningIn;
-    private int mRequestId;
+    private int mRequestId = IntIdGenerator.INVALID_ID;
 
     @Override
     public boolean needShowLeftDrawer() {
@@ -120,10 +124,12 @@ public final class SignInScene extends SolidScene implements EditText.OnEditorAc
         mProgress = ViewUtils.$$(view, R.id.progress);
         mUsernameLayout = (TextInputLayout) ViewUtils.$$(loginForm, R.id.username_layout);
         mUsername = mUsernameLayout.getEditText();
-        Assert.assertNotNull(mUsername);
+        AssertUtils.assertNotNull(mUsername);
         mPasswordLayout = (TextInputLayout) ViewUtils.$$(loginForm, R.id.password_layout);
         mPassword = mPasswordLayout.getEditText();
-        Assert.assertNotNull(mPassword);
+        AssertUtils.assertNotNull(mPassword);
+        mRecaptcha = (EditText) ViewUtils.$$(loginForm, R.id.recaptcha);
+        mRecaptchaView = (RecaptchaView) ViewUtils.$$(loginForm, R.id.recaptcha_image);
         mRegister = ViewUtils.$$(loginForm, R.id.register);
         mSignIn = ViewUtils.$$(loginForm, R.id.sign_in);
         mSignInViaWebView = (TextView) ViewUtils.$$(loginForm, R.id.sign_in_via_webview);
@@ -143,7 +149,7 @@ public final class SignInScene extends SolidScene implements EditText.OnEditorAc
         mSkipSigningIn.setOnClickListener(this);
 
         Context context = getContext2();
-        Assert.assertNotNull(context);
+        AssertUtils.assertNotNull(context);
         EhApplication application = (EhApplication) context.getApplicationContext();
         if (application.containGlobalStuff(mRequestId)) {
             mSigningIn = true;
@@ -226,8 +232,8 @@ public final class SignInScene extends SolidScene implements EditText.OnEditorAc
         } else if (mSignInViaCookies == v) {
             startScene(new Announcer(CookieSignInScene.class).setRequestCode(this, REQUEST_CODE_COOKIE));
         } else if (mSkipSigningIn == v) {
-            // Set gallery size SITE_G if skip sign in
-            Settings.putGallerySite(EhUrl.SITE_G);
+            // Set gallery size SITE_E if skip sign in
+            Settings.putGallerySite(EhUrl.SITE_E);
             redirectTo();
         }
     }
@@ -279,14 +285,18 @@ public final class SignInScene extends SolidScene implements EditText.OnEditorAc
         // Clean up for sign in
         EhUtils.signOut(context);
 
+        String challenge = mRecaptchaView.getChallenge();
+        String response = mRecaptcha.getText().toString();
+
         EhCallback callback = new SignInListener(context,
                 activity.getStageId(), getTag());
         mRequestId = ((EhApplication) context.getApplicationContext()).putGlobalStuff(callback);
         EhRequest request = new EhRequest()
                 .setMethod(EhClient.METHOD_SIGN_IN)
-                .setArgs(username, password)
+                .setArgs(username, password, challenge, response)
                 .setCallback(callback);
         EhApplication.getEhClient(context).execute(request);
+        Analytics.signIn();
 
         mSigningIn = true;
     }
@@ -319,7 +329,7 @@ public final class SignInScene extends SolidScene implements EditText.OnEditorAc
         finish();
     }
 
-    private void whetherToSkip() {
+    private void whetherToSkip(Exception e) {
         Context context = getContext2();
         if (null == context) {
             return;
@@ -327,12 +337,12 @@ public final class SignInScene extends SolidScene implements EditText.OnEditorAc
 
         new AlertDialog.Builder(context)
                 .setTitle(R.string.sign_in_failed)
-                .setMessage(R.string.sign_in_failed_plain)
+                .setMessage(ExceptionUtils.getReadableString(e))
                 .setPositiveButton(R.string.get_it, null)
                 .show();
     }
 
-    public void onSignInEnd() {
+    public void onSignInEnd(Exception e) {
         Context context = getContext2();
         if (null == context) {
             return;
@@ -343,7 +353,7 @@ public final class SignInScene extends SolidScene implements EditText.OnEditorAc
         } else {
             mSigningIn = false;
             hideProgress();
-            whetherToSkip();
+            whetherToSkip(e);
         }
     }
 
@@ -366,7 +376,7 @@ public final class SignInScene extends SolidScene implements EditText.OnEditorAc
 
             SignInScene scene = getScene();
             if (scene != null) {
-                scene.onSignInEnd();
+                scene.onSignInEnd(null);
             }
         }
 
@@ -377,7 +387,7 @@ public final class SignInScene extends SolidScene implements EditText.OnEditorAc
 
             SignInScene scene = getScene();
             if (scene != null) {
-                scene.onSignInEnd();
+                scene.onSignInEnd(e);
             }
         }
 

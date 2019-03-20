@@ -18,13 +18,11 @@ package com.hippo.ehviewer.client;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
-
+import androidx.annotation.Nullable;
 import com.hippo.ehviewer.EhApplication;
 import com.hippo.ehviewer.Settings;
 import com.hippo.ehviewer.client.data.GalleryInfo;
-
 import java.util.regex.Pattern;
 
 public class EhUtils {
@@ -72,9 +70,9 @@ public class EhUtils {
             new String[] { "misc" },
             new String[] { "doujinshi" },
             new String[] { "manga" },
-            new String[] { "artistcg", "Artist CG Sets" },
-            new String[] { "gamecg", "Game CG Sets" },
-            new String[] { "imageset", "Image Sets" },
+            new String[] { "artistcg", "Artist CG Sets", "Artist CG" },
+            new String[] { "gamecg", "Game CG Sets", "Game CG" },
+            new String[] { "imageset", "Image Sets", "Image Set" },
             new String[] { "cosplay" },
             new String[] { "asianporn", "Asian Porn" },
             new String[] { "non-h" },

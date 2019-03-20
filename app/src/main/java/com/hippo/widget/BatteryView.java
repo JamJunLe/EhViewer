@@ -25,12 +25,11 @@ import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.os.BatteryManager;
 import android.util.AttributeSet;
-import android.widget.TextView;
-
+import androidx.appcompat.widget.AppCompatTextView;
 import com.hippo.drawable.BatteryDrawable;
 import com.hippo.ehviewer.R;
 
-public class BatteryView extends TextView {
+public class BatteryView extends AppCompatTextView {
 
     private int mColor;
     private int mWarningColor;

@@ -18,9 +18,9 @@ package com.hippo.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.widget.TextView;
+import androidx.appcompat.widget.AppCompatTextView;
 
-public class ObservedTextView extends TextView {
+public class ObservedTextView extends AppCompatTextView {
 
     private OnWindowAttachListener mOnWindowAttachListener;
 

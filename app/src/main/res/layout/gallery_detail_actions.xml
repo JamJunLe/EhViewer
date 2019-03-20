@@ -25,14 +25,14 @@
     android:paddingBottom="@dimen/keyline_margin">
 
     <HorizontalScrollView
+        android:id="@+id/actions_scroll_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:paddingLeft="@dimen/keyline_margin"
         android:paddingRight="@dimen/keyline_margin"
         android:clipToPadding="false"
-        android:scrollbars="none"
-        android:overScrollMode="never">
+        android:scrollbars="none">
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -53,7 +53,7 @@
                     android:gravity="center_horizontal"
                     android:text="@string/favorited"
                     android:drawablePadding="8dp"
-                    android:textColor="@color/primary_text_light"/>
+                    android:textColor="?android:attr/textColorPrimary"/>
 
                 <TextView
                     android:id="@+id/heart_outline"
@@ -62,26 +62,9 @@
                     android:gravity="center_horizontal"
                     android:text="@string/not_favorited"
                     android:drawablePadding="8dp"
-                    android:textColor="@color/primary_text_light"/>
+                    android:textColor="?android:attr/textColorPrimary"/>
 
             </FrameLayout>
-
-            <TextView
-                android:id="@+id/torrent"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:drawablePadding="8dp"
-                android:textColor="@color/primary_text_light"/>
-
-            <TextView
-                android:id="@+id/share"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:text="@string/share"
-                android:drawablePadding="8dp"
-                android:textColor="@color/primary_text_light"/>
 
             <TextView
                 android:id="@+id/rate"
@@ -90,7 +73,33 @@
                 android:gravity="center_horizontal"
                 android:text="@string/rate"
                 android:drawablePadding="8dp"
-                android:textColor="@color/primary_text_light"/>
+                android:textColor="?android:attr/textColorPrimary"/>
+
+            <TextView
+                android:id="@+id/share"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:text="@string/share"
+                android:drawablePadding="8dp"
+                android:textColor="?android:attr/textColorPrimary"/>
+
+            <TextView
+                android:id="@+id/torrent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:drawablePadding="8dp"
+                android:textColor="?android:attr/textColorPrimary"/>
+
+            <TextView
+                android:id="@+id/archive"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/archive"
+                android:gravity="center_horizontal"
+                android:drawablePadding="8dp"
+                android:textColor="?android:attr/textColorPrimary"/>
 
             <TextView
                 android:id="@+id/similar"
@@ -99,7 +108,7 @@
                 android:gravity="center_horizontal"
                 android:text="@string/similar_gallery"
                 android:drawablePadding="8dp"
-                android:textColor="@color/primary_text_light"/>
+                android:textColor="?android:attr/textColorPrimary"/>
 
             <TextView
                 android:id="@+id/search_cover"
@@ -108,24 +117,25 @@
                 android:gravity="center_horizontal"
                 android:text="@string/search_cover"
                 android:drawablePadding="8dp"
-                android:textColor="@color/primary_text_light"/>
+                android:textColor="?android:attr/textColorPrimary"/>
 
         </LinearLayout>
     </HorizontalScrollView>
 
-    <android.support.v7.widget.AppCompatRatingBar
+    <androidx.appcompat.widget.AppCompatRatingBar
         android:id="@+id/rating"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:layout_gravity="center_horizontal"
-        android:isIndicator="true"/>
+        android:isIndicator="true"
+        android:theme="@style/RatingBarTheme"/>
 
     <TextView
         android:id="@+id/rating_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:textColor="@color/primary_text_light"/>
+        android:textColor="?android:attr/textColorPrimary"/>
 
 </LinearLayout>

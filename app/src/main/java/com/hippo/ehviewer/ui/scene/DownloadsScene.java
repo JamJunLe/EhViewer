@@ -22,20 +22,13 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.Point;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SimpleItemAnimator;
-import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.Display;
@@ -50,14 +43,24 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.ViewCompat;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.SimpleItemAnimator;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.SimpleShowcaseEventListener;
 import com.github.amlcurran.showcaseview.targets.PointTarget;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.hippo.android.resource.AttrResources;
 import com.hippo.app.CheckBoxDialogBuilder;
 import com.hippo.conaco.DataContainer;
 import com.hippo.conaco.ProgressNotifier;
+import com.hippo.drawerlayout.DrawerLayout;
 import com.hippo.easyrecyclerview.EasyRecyclerView;
 import com.hippo.easyrecyclerview.FastScroller;
 import com.hippo.easyrecyclerview.HandlerDrawable;
@@ -82,21 +85,18 @@ import com.hippo.ripple.Ripple;
 import com.hippo.scene.Announcer;
 import com.hippo.streampipe.InputStreamPipe;
 import com.hippo.unifile.UniFile;
-import com.hippo.util.ApiHelper;
 import com.hippo.util.DrawableManager;
+import com.hippo.util.IoThreadPoolExecutor;
 import com.hippo.view.ViewTransition;
 import com.hippo.widget.FabLayout;
 import com.hippo.widget.LoadImageView;
 import com.hippo.widget.recyclerview.AutoStaggeredGridLayoutManager;
+import com.hippo.yorozuya.AssertUtils;
 import com.hippo.yorozuya.FileUtils;
 import com.hippo.yorozuya.IOUtils;
 import com.hippo.yorozuya.ObjectUtils;
-import com.hippo.yorozuya.ResourcesUtils;
 import com.hippo.yorozuya.ViewUtils;
 import com.hippo.yorozuya.collect.LongList;
-
-import junit.framework.Assert;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -194,7 +194,7 @@ public class DownloadsScene extends ToolbarScene
         super.onCreate(savedInstanceState);
 
         Context context = getContext2();
-        Assert.assertNotNull(context);
+        AssertUtils.assertNotNull(context);
         mDownloadManager = EhApplication.getDownloadManager(context);
         mDownloadManager.addDownloadInfoListener(this);
 
@@ -287,10 +287,10 @@ public class DownloadsScene extends ToolbarScene
         mViewTransition = new ViewTransition(content, tip);
 
         Context context = getContext2();
-        Assert.assertNotNull(content);
+        AssertUtils.assertNotNull(content);
         Resources resources = context.getResources();
 
-        Drawable drawable = DrawableManager.getDrawable(context, R.drawable.big_download);
+        Drawable drawable = DrawableManager.getVectorDrawable(context, R.drawable.big_download);
         drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
         tip.setCompoundDrawables(null, drawable, null, null);
 
@@ -301,7 +301,7 @@ public class DownloadsScene extends ToolbarScene
         mLayoutManager.setColumnSize(resources.getDimensionPixelOffset(Settings.getDetailSizeResId()));
         mLayoutManager.setStrategy(AutoStaggeredGridLayoutManager.STRATEGY_MIN_SIZE);
         mRecyclerView.setLayoutManager(mLayoutManager);
-        mRecyclerView.setSelector(Ripple.generateRippleDrawable(context, false));
+        mRecyclerView.setSelector(Ripple.generateRippleDrawable(context, !AttrResources.getAttrBoolean(context, R.attr.isLightTheme), new ColorDrawable(Color.TRANSPARENT)));
         mRecyclerView.setDrawSelectorOnTop(true);
         mRecyclerView.hasFixedSize();
         mRecyclerView.setClipToPadding(false);
@@ -327,7 +327,7 @@ public class DownloadsScene extends ToolbarScene
 
         fastScroller.attachToRecyclerView(mRecyclerView);
         HandlerDrawable handlerDrawable = new HandlerDrawable();
-        handlerDrawable.setColor(ResourcesUtils.getAttrColor(context, R.attr.colorAccent));
+        handlerDrawable.setColor(AttrResources.getAttrColor(context, R.attr.widgetColorThemeAccent));
         fastScroller.setHandlerDrawable(handlerDrawable);
         fastScroller.setOnDragHandlerListener(this);
 
@@ -489,6 +489,17 @@ public class DownloadsScene extends ToolbarScene
                 }
                 return true;
             }
+            case R.id.action_reset_reading_progress: {
+                new AlertDialog.Builder(getContext())
+                        .setMessage(R.string.reset_reading_progress_message)
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                            if (mDownloadManager != null) {
+                                mDownloadManager.resetAllReadingProgress();
+                            }
+                        }).show();
+                return true;
+            }
         }
         return false;
     }
@@ -509,7 +520,7 @@ public class DownloadsScene extends ToolbarScene
         View view = inflater.inflate(R.layout.drawer_list, container, false);
 
         final Context context = getContext2();
-        Assert.assertNotNull(context);
+        AssertUtils.assertNotNull(context);
 
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
         toolbar.setTitle(R.string.download_labels);
@@ -635,7 +646,7 @@ public class DownloadsScene extends ToolbarScene
             if (list == null) {
                 return false;
             }
-            if (position < 0 && position >= list.size()) {
+            if (position < 0 || position >= list.size()) {
                 return false;
             }
 
@@ -921,11 +932,13 @@ public class DownloadsScene extends ToolbarScene
             @Override
             protected Void doInBackground(UniFile... params) {
                 for (UniFile file: params) {
-                    file.delete();
+                    if (file != null) {
+                        file.delete();
+                    }
                 }
                 return null;
             }
-        }.execute(files);
+        }.executeOnExecutor(IoThreadPoolExecutor.getInstance(), files);
     }
 
     private class DeleteDialogHelper implements DialogInterface.OnClickListener {
@@ -1074,8 +1087,10 @@ public class DownloadsScene extends ToolbarScene
             thumb.setOnClickListener(this);
             start.setOnClickListener(this);
             stop.setOnClickListener(this);
-            Ripple.addRipple(start, false);
-            Ripple.addRipple(stop, false);
+
+            boolean isDarkTheme = !AttrResources.getAttrBoolean(getContext2(), R.attr.isLightTheme);
+            Ripple.addRipple(start, isDarkTheme);
+            Ripple.addRipple(stop, isDarkTheme);
         }
 
         @Override
@@ -1092,7 +1107,7 @@ public class DownloadsScene extends ToolbarScene
             }
             int size = list.size();
             int index = recyclerView.getChildAdapterPosition(itemView);
-            if (index < 0 && index >= size) {
+            if (index < 0 || index >= size) {
                 return;
             }
 
@@ -1101,9 +1116,7 @@ public class DownloadsScene extends ToolbarScene
                 args.putString(GalleryDetailScene.KEY_ACTION, GalleryDetailScene.ACTION_GALLERY_INFO);
                 args.putParcelable(GalleryDetailScene.KEY_GALLERY_INFO, list.get(index));
                 Announcer announcer = new Announcer(GalleryDetailScene.class).setArgs(args);
-                if (ApiHelper.SUPPORT_TRANSITION) {
-                    announcer.setTranHelper(new EnterGalleryDetailTransaction(thumb));
-                }
+                announcer.setTranHelper(new EnterGalleryDetailTransaction(thumb));
                 startScene(announcer);
             } else if (start == v) {
                 Intent intent = new Intent(activity, DownloadService.class);
@@ -1121,10 +1134,17 @@ public class DownloadsScene extends ToolbarScene
     private class DownloadAdapter extends RecyclerView.Adapter<DownloadHolder> {
 
         private final LayoutInflater mInflater;
+        private final int mListThumbWidth;
+        private final int mListThumbHeight;
 
         public DownloadAdapter() {
             mInflater = getLayoutInflater2();
-            Assert.assertNotNull(mInflater);
+            AssertUtils.assertNotNull(mInflater);
+
+            View calculator = mInflater.inflate(R.layout.item_gallery_list_thumb_height, null);
+            ViewUtils.measureView(calculator, 1024, ViewGroup.LayoutParams.WRAP_CONTENT);
+            mListThumbHeight = calculator.getMeasuredHeight();
+            mListThumbWidth = mListThumbHeight * 2 / 3;
         }
 
         @Override
@@ -1137,7 +1157,14 @@ public class DownloadsScene extends ToolbarScene
 
         @Override
         public DownloadHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            return new DownloadHolder(mInflater.inflate(R.layout.item_download, parent, false));
+            DownloadHolder holder = new DownloadHolder(mInflater.inflate(R.layout.item_download, parent, false));
+
+            ViewGroup.LayoutParams lp = holder.thumb.getLayoutParams();
+            lp.width = mListThumbWidth;
+            lp.height = mListThumbHeight;
+            holder.thumb.setLayoutParams(lp);
+
+            return holder;
         }
 
         @Override
@@ -1161,8 +1188,7 @@ public class DownloadsScene extends ToolbarScene
 
             // Update transition name
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                long gid = info.gid;
-                holder.thumb.setTransitionName(TransitionNameFactory.getThumbTransitionName(gid));
+                ViewCompat.setTransitionName(holder.thumb, TransitionNameFactory.getThumbTransitionName(info.gid));
             }
         }
 

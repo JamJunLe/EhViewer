@@ -34,7 +34,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:gravity="center_horizontal"
-        android:drawablePadding="16dp"
+        android:drawablePadding="8dp"
         android:text="@string/no_one_comments_gallery"
         style="@style/TextAppearance.AppCompat.Medium"/>
 
@@ -55,7 +55,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:background="?attr/colorPrimary">
+            android:background="?attr/contentColorThemePrimary">
 
             <EditText
                 android:id="@+id/edit_text"
@@ -88,13 +88,13 @@
         android:paddingRight="@dimen/corner_fab_margin"
         android:paddingBottom="@dimen/corner_fab_margin">
 
-        <android.support.design.widget.FloatingActionButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             xmlns:app="http://schemas.android.com/apk/res-auto"
             android:id="@+id/fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:srcCompat="@drawable/v_reply_dark_x24"
-            app:backgroundTint="?attr/colorPrimary"
+            app:backgroundTint="?attr/widgetColorThemePrimary"
             style="@style/Widget.Design.FloatingActionButton"/>
 
     </com.hippo.widget.FabLayout>

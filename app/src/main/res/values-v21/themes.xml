@@ -17,7 +17,29 @@
 
 <resources>
 
-    <style name="AppTheme.Main" parent="AppTheme.NoActionBar">
+    <style name="AppTheme" parent="BaseTheme">
+        <item name="android:colorEdgeEffect">?attr/colorEdgeEffect</item>
+    </style>
+
+    <style name="AppTheme.Dark" parent="BaseTheme.Dark">
+        <item name="android:colorEdgeEffect">?attr/colorEdgeEffect</item>
+    </style>
+
+    <style name="AppTheme.Black" parent="BaseTheme.Black">
+        <item name="android:colorEdgeEffect">?attr/colorEdgeEffect</item>
+    </style>
+
+    <style name="AppTheme.NoActionBar.Translucent">
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+
+    <style name="AppTheme.Dark.NoActionBar.Translucent">
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+
+    <style name="AppTheme.Black.NoActionBar.Translucent">
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>

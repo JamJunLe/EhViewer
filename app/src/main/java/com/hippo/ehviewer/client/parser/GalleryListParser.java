@@ -16,37 +16,54 @@
 
 package com.hippo.ehviewer.client.parser;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.util.Log;
-
+import androidx.annotation.NonNull;
+import com.hippo.ehviewer.EhApplication;
+import com.hippo.ehviewer.EhDB;
 import com.hippo.ehviewer.client.EhUtils;
 import com.hippo.ehviewer.client.data.GalleryInfo;
+import com.hippo.ehviewer.client.data.GalleryTagGroup;
 import com.hippo.ehviewer.client.exception.ParseException;
+import com.hippo.util.ExceptionUtils;
 import com.hippo.util.JsoupUtils;
 import com.hippo.yorozuya.NumberUtils;
 import com.hippo.yorozuya.StringUtils;
-
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 public class GalleryListParser {
 
     private static final String TAG = GalleryListParser.class.getSimpleName();
 
     private static final Pattern PATTERN_RATING = Pattern.compile("\\d+px");
-    private static final Pattern PATTERN_THUMB_SIZE = Pattern.compile("height:(\\d+)px; width:(\\d+)px");
+    private static final Pattern PATTERN_THUMB_SIZE = Pattern.compile("height:(\\d+)px;width:(\\d+)px");
+    private static final Pattern PATTERN_FAVORITE_SLOT = Pattern.compile("background-color:rgba\\((\\d+),(\\d+),(\\d+),");
+    private static final Pattern PATTERN_PAGES = Pattern.compile("(\\d+) page");
+    private static final Pattern PATTERN_NEXT_PAGE = Pattern.compile("page=(\\d+)");
+
+    private static final String[][] FAVORITE_SLOT_RGB = new String[][] {
+        new String[] { "0", "0", "0"},
+        new String[] { "240", "0", "0"},
+        new String[] { "240", "160", "0"},
+        new String[] { "208", "208", "0"},
+        new String[] { "0", "128", "0"},
+        new String[] { "144", "240", "64"},
+        new String[] { "64", "176", "240"},
+        new String[] { "0", "0", "240"},
+        new String[] { "80", "0", "128"},
+        new String[] { "224", "128", "224"},
+    };
 
     public static class Result {
         public int pages;
+        public int nextPage;
         public List<GalleryInfo> galleryInfoList;
     }
 
@@ -54,25 +71,25 @@ public class GalleryListParser {
         try {
             Elements es = d.getElementsByClass("ptt").first().child(0).child(0).children();
             return Integer.parseInt(es.get(es.size() - 2).text().trim());
-        } catch (Exception e) {
+        } catch (Throwable e) {
+            ExceptionUtils.throwIfFatal(e);
             throw new ParseException("Can't parse gallery list pages", body);
         }
     }
 
     private static String parseRating(String ratingStyle) {
         Matcher m = PATTERN_RATING.matcher(ratingStyle);
-        int num1;
-        int num2;
+        int num1 = Integer.MIN_VALUE;
+        int num2 = Integer.MIN_VALUE;
         int rate = 5;
         String re;
         if (m.find()) {
-            num1 = ParserUtils.parseInt(m.group().replace("px", ""));
-        } else {
-            return null;
+            num1 = ParserUtils.parseInt(m.group().replace("px", ""), Integer.MIN_VALUE);
         }
         if (m.find()) {
-            num2 = ParserUtils.parseInt(m.group().replace("px", ""));
-        } else {
+            num2 = ParserUtils.parseInt(m.group().replace("px", ""), Integer.MIN_VALUE);
+        }
+        if (num1 == Integer.MIN_VALUE || num2 == Integer.MIN_VALUE) {
             return null;
         }
         rate = rate - num1 / 16;
@@ -85,30 +102,69 @@ public class GalleryListParser {
         return re;
     }
 
-    @Nullable
+    private static int parseFavoriteSlot(String style) {
+        Matcher m = PATTERN_FAVORITE_SLOT.matcher(style);
+        if (m.find()) {
+            String r = m.group(1);
+            String g = m.group(2);
+            String b = m.group(3);
+            int slot = 0;
+            for (String[] rgb : FAVORITE_SLOT_RGB) {
+                if (r.equals(rgb[0]) && g.equals(rgb[1]) && b.equals(rgb[2])) {
+                    return slot;
+                }
+                slot++;
+            }
+        }
+        return -2;
+    }
+
     private static GalleryInfo parseGalleryInfo(Element e) {
         GalleryInfo gi = new GalleryInfo();
-        // Get category
-        Element ic = JsoupUtils.getElementByClass(e, "ic");
-        if (null != ic) {
-            gi.category = EhUtils.getCategory(ic.attr("alt").trim());
-        } else {
-            Log.w(TAG, "Can't parse gallery info category");
-            gi.category = EhUtils.UNKNOWN;
+
+        // Title, gid, token (required), tags
+        Element glname = JsoupUtils.getElementByClass(e, "glname");
+        if (glname != null) {
+            Element a = JsoupUtils.getElementByTag(glname, "a");
+            if (a != null) {
+                GalleryDetailUrlParser.Result result = GalleryDetailUrlParser.parse(a.attr("href"));
+                if (result != null) {
+                    gi.gid = result.gid;
+                    gi.token = result.token;
+                    gi.title = a.text().trim();
+                }
+            }
+            Element tbody = JsoupUtils.getElementByTag(glname, "tbody");
+            if (tbody != null) {
+                ArrayList<String> tags = new ArrayList<>();
+                GalleryTagGroup[] groups = GalleryDetailParser.parseTagGroups(tbody.children());
+                for (GalleryTagGroup group : groups) {
+                    for (int j = 0; j < group.size(); j++) {
+                        tags.add(group.groupName + ":" + group.getTagAt(j));
+                    }
+                }
+                gi.simpleTags = tags.toArray(new String[tags.size()]);
+            }
         }
-        // Posted
-        Element itd = JsoupUtils.getElementByClass(e, "itd");
-        if (null != itd) {
-            gi.posted = itd.text().trim();
-        } else {
-            Log.w(TAG, "Can't parse gallery info posted");
-            gi.posted = "";
+        if (gi.title == null) {
+            return null;
         }
+
+        // Category
+        gi.category = EhUtils.UNKNOWN;
+        Element ce = JsoupUtils.getElementByClass(e, "cn");
+        if (ce == null) {
+            ce = JsoupUtils.getElementByClass(e, "cs");
+        }
+        if (ce != null) {
+            gi.category = EhUtils.getCategory(ce.text());
+        }
+
         // Thumb
-        Element it2 = JsoupUtils.getElementByClass(e, "it2");
-        if (null != it2) {
+        Element glthumb = JsoupUtils.getElementByClass(e, "glthumb");
+        if (glthumb != null) {
             // Thumb size
-            Matcher m = PATTERN_THUMB_SIZE.matcher(it2.attr("style"));
+            Matcher m = PATTERN_THUMB_SIZE.matcher(glthumb.attr("style"));
             if (m.find()) {
                 gi.thumbWidth = NumberUtils.parseIntSafely(m.group(2), 0);
                 gi.thumbHeight = NumberUtils.parseIntSafely(m.group(1), 0);
@@ -117,65 +173,90 @@ public class GalleryListParser {
                 gi.thumbWidth = 0;
                 gi.thumbHeight = 0;
             }
-
             // Thumb url
-            Elements es = it2.children();
-            if (null != es && es.size() >= 1) {
-                gi.thumb = EhUtils.handleThumbUrlResolution(es.get(0).attr("src"));
+            Element img = glthumb.children().first();
+            if (img != null) {
+                gi.thumb = EhUtils.handleThumbUrlResolution(img.attr("src"));
             } else {
-                String html = it2.html();
+                String html = glthumb.html();
                 int index1 = html.indexOf('~');
                 int index2 = StringUtils.ordinalIndexOf(html, '~', 2);
                 if (index1 < index2) {
                     gi.thumb = EhUtils.handleThumbUrlResolution(
-                            "http://" +StringUtils.replace(html.substring(index1 + 1, index2), "~", "/"));
-                } else {
-                    Log.w(TAG, "Can't parse gallery info thumb url");
-                    gi.thumb = "";
+                        "https://" +StringUtils.replace(html.substring(index1 + 1, index2), "~", "/"));
                 }
             }
-        } else {
-            Log.w(TAG, "Can't parse gallery info thumb");
-            gi.thumbWidth = 0;
-            gi.thumbHeight = 0;
-            gi.thumb = "";
         }
-        // Title (required)
-        Element it5 = JsoupUtils.getElementByClass(e, "it5");
-        if (null == it5) {
-            Log.e(TAG, "Can't parse gallery info title, step 1");
-            return null;
+        // Try extended and thumbnail version
+        if (gi.thumb == null) {
+            Element gl = JsoupUtils.getElementByClass(e, "gl1e");
+            if (gl == null) {
+                gl = JsoupUtils.getElementByClass(e, "gl3t");
+            }
+            if (gl != null) {
+                Element img = JsoupUtils.getElementByTag(gl, "img");
+                if (img != null) {
+                    // Thumb size
+                    Matcher m = PATTERN_THUMB_SIZE.matcher(img.attr("style"));
+                    if (m.find()) {
+                        gi.thumbWidth = NumberUtils.parseIntSafely(m.group(2), 0);
+                        gi.thumbHeight = NumberUtils.parseIntSafely(m.group(1), 0);
+                    } else {
+                        Log.w(TAG, "Can't parse gallery info thumb size");
+                        gi.thumbWidth = 0;
+                        gi.thumbHeight = 0;
+                    }
+                    gi.thumb = EhUtils.handleThumbUrlResolution(img.attr("src"));
+                }
+            }
         }
-        Elements es = it5.children();
-        if (null == es || es.size() <= 0) {
-            Log.e(TAG, "Can't parse gallery info title, step 2");
-            return null;
+
+        // Posted
+        gi.favoriteSlot = -2;
+        Element posted = e.getElementById("posted_" + gi.gid);
+        if (posted != null) {
+            gi.posted = posted.text().trim();
+            gi.favoriteSlot = parseFavoriteSlot(posted.attr("style"));
         }
-        Element a = es.get(0);
-        GalleryDetailUrlParser.Result result = GalleryDetailUrlParser.parse(a.attr("href"));
-        if (null == result) {
-            Log.e(TAG, "Can't parse gallery info title, step 3");
-            return null;
+        if (gi.favoriteSlot == -2) {
+            gi.favoriteSlot = EhDB.containLocalFavorites(gi.gid) ? -1 : -2;
         }
-        gi.gid = result.gid;
-        gi.token = result.token;
-        gi.title = a.text().trim();
+
         // Rating
-        Element it4r = JsoupUtils.getElementByClass(e, "it4r");
-        if (null != it4r) {
-            gi.rating = NumberUtils.parseFloatSafely(parseRating(it4r.attr("style")), -1.0f);
-        } else {
-            Log.w(TAG, "Can't parse gallery info rating");
-            gi.rating = -1.0f;
+        Element ir = JsoupUtils.getElementByClass(e, "ir");
+        if (ir != null) {
+            gi.rating = NumberUtils.parseFloatSafely(parseRating(ir.attr("style")), -1.0f);
+            // TODO The gallery may be rated even if it doesn't has one of these classes
+            gi.rated = ir.hasClass("irr") || ir.hasClass("irg") || ir.hasClass("irb");
         }
-        // Uploader
-        Element itu = JsoupUtils.getElementByClass(e, "itu");
-        if (null != itu) {
-            gi.uploader = itu.text().trim();
-        } else {
-            Log.w(TAG, "Can't parse gallery info uploader");
-            gi.uploader = "";
+
+        // Uploader and pages
+        Element gl = JsoupUtils.getElementByClass(e, "glhide");
+        int uploaderIndex = 0;
+        int pagesIndex = 1;
+        if (gl == null) {
+            gl = JsoupUtils.getElementByClass(e, "gl3e");
+            uploaderIndex = 3;
+            pagesIndex = 4;
         }
+        if (gl != null) {
+            Elements children = gl.children();
+            if (children.size() > uploaderIndex) {
+                Element a = children.get(uploaderIndex).children().first();
+                if (a != null) {
+                    gi.uploader = a.text().trim();
+                }
+            }
+            if (children.size() > pagesIndex) {
+                Matcher matcher = PATTERN_PAGES.matcher(children.get(pagesIndex).text());
+                if (matcher.find()) {
+                    gi.pages = NumberUtils.parseIntSafely(matcher.group(1), 0);
+                }
+            }
+        }
+
+        // Downloaded
+        gi.downloaded = EhApplication.getDownloadManager().containDownloadInfo(gi.gid);
 
         gi.generateSLang();
 
@@ -187,29 +268,52 @@ public class GalleryListParser {
         Document d = Jsoup.parse(body);
 
         try {
-            result.pages = parsePages(d, body);
-        } catch (ParseException e) {
+            Element ptt = d.getElementsByClass("ptt").first();
+            Elements es = ptt.child(0).child(0).children();
+            result.pages = Integer.parseInt(es.get(es.size() - 2).text().trim());
+
+            Element e = es.get(es.size() - 1);
+            if (e != null) {
+                String href = e.child(0).attr("href");
+                Matcher matcher = PATTERN_NEXT_PAGE.matcher(href);
+                if (matcher.find()) {
+                    result.nextPage = Integer.parseInt(matcher.group(1));
+                }
+            }
+        } catch (Throwable e) {
+            ExceptionUtils.throwIfFatal(e);
             if (body.contains("No hits found</p>")) {
                 result.pages = 0;
                 //noinspection unchecked
                 result.galleryInfoList = Collections.EMPTY_LIST;
                 return result;
+            } else if (body.contains("Currently Popular Recent Galleries")) {
+                result.pages = 1;
             } else {
-                throw e;
+                result.pages = Integer.MAX_VALUE;
             }
         }
 
         try {
-            Elements es = d.getElementsByClass("itg").first().child(0).children();
-            List<GalleryInfo> list = new ArrayList<>(es.size() - 1);
-            for (int i = 1; i < es.size(); i++) { // First one is table header, skip it
+            Element itg = d.getElementsByClass("itg").first();
+            Elements es;
+            if ("table".equalsIgnoreCase(itg.tagName())) {
+                es = itg.child(0).children();
+            } else {
+                es = itg.children();
+            }
+            List<GalleryInfo> list = new ArrayList<>(es.size());
+            // First one is table header, skip it
+            for (int i = 0; i < es.size(); i++) {
                 GalleryInfo gi = parseGalleryInfo(es.get(i));
                 if (null != gi) {
                     list.add(gi);
                 }
             }
             result.galleryInfoList = list;
-        } catch (Exception e) {
+        } catch (Throwable e) {
+            ExceptionUtils.throwIfFatal(e);
+            e.printStackTrace();
             throw new ParseException("Can't parse gallery list", body);
         }
 

@@ -18,17 +18,17 @@ package com.hippo.ehviewer.ui.scene;
 
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
-import android.support.annotation.IntDef;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
+import androidx.annotation.IntDef;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.view.ViewCompat;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import com.hippo.drawable.TriangleDrawable;
 import com.hippo.easyrecyclerview.MarginItemDecoration;
 import com.hippo.ehviewer.R;
@@ -38,7 +38,7 @@ import com.hippo.ehviewer.client.EhUtils;
 import com.hippo.ehviewer.client.data.GalleryInfo;
 import com.hippo.ehviewer.widget.TileThumb;
 import com.hippo.widget.recyclerview.AutoStaggeredGridLayoutManager;
-
+import com.hippo.yorozuya.ViewUtils;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -59,18 +59,27 @@ abstract class GalleryAdapter extends RecyclerView.Adapter<GalleryHolder> {
     private final int mPaddingTopSB;
     private MarginItemDecoration mListDecoration;
     private MarginItemDecoration mGirdDecoration;
+    private final int mListThumbWidth;
+    private final int mListThumbHeight;
     private int mType = TYPE_INVALID;
+    private boolean mShowFavourited;
 
     public GalleryAdapter(@NonNull LayoutInflater inflater, @NonNull Resources resources,
-            @NonNull RecyclerView recyclerView, int type) {
+            @NonNull RecyclerView recyclerView, int type, boolean showFavourited) {
         mInflater = inflater;
         mResources = resources;
         mRecyclerView = recyclerView;
         mLayoutManager = new AutoStaggeredGridLayoutManager(0, StaggeredGridLayoutManager.VERTICAL);
         mPaddingTopSB = resources.getDimensionPixelOffset(R.dimen.gallery_padding_top_search_bar);
+        mShowFavourited = showFavourited;
 
         mRecyclerView.setAdapter(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
+
+        View calculator = inflater.inflate(R.layout.item_gallery_list_thumb_height, null);
+        ViewUtils.measureView(calculator, 1024, ViewGroup.LayoutParams.WRAP_CONTENT);
+        mListThumbHeight = calculator.getMeasuredHeight();
+        mListThumbWidth = mListThumbHeight * 2 / 3;
 
         setType(type);
     }
@@ -147,7 +156,17 @@ abstract class GalleryAdapter extends RecyclerView.Adapter<GalleryHolder> {
                 layoutId = R.layout.item_gallery_grid;
                 break;
         }
-        return new GalleryHolder(mInflater.inflate(layoutId, parent, false));
+
+        GalleryHolder holder = new GalleryHolder(mInflater.inflate(layoutId, parent, false));
+
+        if (viewType == TYPE_LIST) {
+            ViewGroup.LayoutParams lp = holder.thumb.getLayoutParams();
+            lp.width = mListThumbWidth;
+            lp.height = mListThumbHeight;
+            holder.thumb.setLayoutParams(lp);
+        }
+
+        return holder;
     }
 
     @Override
@@ -174,12 +193,27 @@ abstract class GalleryAdapter extends RecyclerView.Adapter<GalleryHolder> {
                 holder.rating.setRating(gi.rating);
                 TextView category = holder.category;
                 String newCategoryText = EhUtils.getCategory(gi.category);
-                if (!newCategoryText.equals(category.getText())) {
+                if (!newCategoryText.equals(category.getText().toString())) {
                     category.setText(newCategoryText);
                     category.setBackgroundColor(EhUtils.getCategoryColor(gi.category));
                 }
                 holder.posted.setText(gi.posted);
-                holder.simpleLanguage.setText(gi.simpleLanguage);
+                if (gi.pages == 0 || !Settings.getShowGalleryPages()) {
+                    holder.pages.setText(null);
+                    holder.pages.setVisibility(View.GONE);
+                } else {
+                    holder.pages.setText(Integer.toString(gi.pages) + "P");
+                    holder.pages.setVisibility(View.VISIBLE);
+                }
+                if (TextUtils.isEmpty(gi.simpleLanguage)) {
+                    holder.simpleLanguage.setText(null);
+                    holder.simpleLanguage.setVisibility(View.GONE);
+                } else {
+                    holder.simpleLanguage.setText(gi.simpleLanguage);
+                    holder.simpleLanguage.setVisibility(View.VISIBLE);
+                }
+                holder.favourited.setVisibility((mShowFavourited && gi.favoriteSlot >= -1 && gi.favoriteSlot <= 10) ? View.VISIBLE : View.GONE);
+                holder.downloaded.setVisibility(gi.downloaded ? View.VISIBLE : View.GONE);
                 break;
             }
             case TYPE_GRID: {
@@ -200,9 +234,6 @@ abstract class GalleryAdapter extends RecyclerView.Adapter<GalleryHolder> {
         }
 
         // Update transition name
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            long gid = gi.gid;
-            holder.thumb.setTransitionName(TransitionNameFactory.getThumbTransitionName(gid));
-        }
+        ViewCompat.setTransitionName(holder.thumb, TransitionNameFactory.getThumbTransitionName(gi.gid));
     }
 }

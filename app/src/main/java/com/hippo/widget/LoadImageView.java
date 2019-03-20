@@ -23,13 +23,12 @@ import android.graphics.drawable.Animatable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
-import android.support.annotation.DrawableRes;
-import android.support.annotation.IntDef;
-import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
-
+import androidx.annotation.DrawableRes;
+import androidx.annotation.IntDef;
+import androidx.annotation.NonNull;
 import com.hippo.conaco.Conaco;
 import com.hippo.conaco.ConacoTask;
 import com.hippo.conaco.DataContainer;
@@ -40,7 +39,7 @@ import com.hippo.ehviewer.R;
 import com.hippo.image.ImageBitmap;
 import com.hippo.image.ImageDrawable;
 import com.hippo.image.RecycledException;
-
+import com.hippo.util.DrawableManager;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -240,11 +239,13 @@ public class LoadImageView extends FixedAspectImageView implements Unikery<Image
 
     public void load(Drawable drawable) {
         unload();
+        onPreSetImageDrawable(drawable, true);
         setImageDrawable(drawable);
     }
 
     public void load(@DrawableRes int id) {
         unload();
+        onPreSetImageResource(id, true);
         setImageResource(id);
     }
 
@@ -291,6 +292,7 @@ public class LoadImageView extends FixedAspectImageView implements Unikery<Image
             drawable = new PreciselyClipDrawable(drawable, mOffsetX, mOffsetY, mClipWidth, mClipHeight);
         }
 
+        onPreSetImageDrawable(drawable, true);
         if ((source == Conaco.SOURCE_DISK || source == Conaco.SOURCE_NETWORK) && isShown()) {
             Drawable[] layers = new Drawable[2];
             layers[0] = new ColorDrawable(Color.TRANSPARENT);
@@ -309,7 +311,9 @@ public class LoadImageView extends FixedAspectImageView implements Unikery<Image
     public void onFailure() {
         mFailed = true;
         clearDrawable();
-        setImageDrawable(getContext().getResources().getDrawable(R.drawable.image_failed));
+        Drawable drawable = DrawableManager.getVectorDrawable(getContext(), R.drawable.image_failed);
+        onPreSetImageDrawable(drawable, true);
+        setImageDrawable(drawable);
         if (mRetryType == RETRY_TYPE_CLICK) {
             setOnClickListener(this);
         } else if (mRetryType == RETRY_TYPE_LONG_CLICK) {
@@ -363,4 +367,8 @@ public class LoadImageView extends FixedAspectImageView implements Unikery<Image
         load(mKey, mUrl, mContainer, true);
         return true;
     }
+
+    public void onPreSetImageDrawable(Drawable drawable, boolean isTarget) { }
+
+    public void onPreSetImageResource(int resId, boolean isTarget) { }
 }

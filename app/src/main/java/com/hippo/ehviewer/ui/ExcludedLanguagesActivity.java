@@ -17,15 +17,15 @@
 package com.hippo.ehviewer.ui;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import com.hippo.android.resource.AttrResources;
 import com.hippo.easyrecyclerview.EasyRecyclerView;
 import com.hippo.ehviewer.R;
 import com.hippo.ehviewer.Settings;
@@ -61,6 +61,7 @@ public class ExcludedLanguagesActivity extends ToolbarActivity
     };
 
     private static final String[] LANGUAGES = {
+            EhConfig.JAPANESE_ORIGINAL,
             EhConfig.JAPANESE_TRANSLATED,
             EhConfig.JAPANESE_REWRITE,
             EhConfig.ENGLISH_ORIGINAL,
@@ -163,11 +164,12 @@ public class ExcludedLanguagesActivity extends ToolbarActivity
         mDeselectAll.setOnClickListener(this);
         mInvertSelection.setOnClickListener(this);
 
-        Ripple.addRipple(mCancel, false);
-        Ripple.addRipple(mOk, false);
-        Ripple.addRipple(mSelectAll, false);
-        Ripple.addRipple(mDeselectAll, false);
-        Ripple.addRipple(mInvertSelection, false);
+        boolean isDarkTheme = !AttrResources.getAttrBoolean(this, R.attr.isLightTheme);
+        Ripple.addRipple(mCancel, isDarkTheme);
+        Ripple.addRipple(mOk, isDarkTheme);
+        Ripple.addRipple(mSelectAll, isDarkTheme);
+        Ripple.addRipple(mDeselectAll, isDarkTheme);
+        Ripple.addRipple(mInvertSelection, isDarkTheme);
     }
 
     private boolean isDecimal(String str) {
@@ -207,8 +209,8 @@ public class ExcludedLanguagesActivity extends ToolbarActivity
                 String pattern = LANGUAGES[j];
                 if (pattern.equals(language)) {
                     // Get it
-                    int row = (j + 1) / 3;
-                    int column = (j + 1) % 3;
+                    int row = j / 3;
+                    int column = j % 3;
                     mSelections[row][column] = true;
                     break;
                 }
@@ -282,22 +284,19 @@ public class ExcludedLanguagesActivity extends ToolbarActivity
             finish();
         } else if (v == mOk) {
             StringBuilder sb = new StringBuilder();
-            int i = -1;
+            int i = 0;
             boolean first = true;
             for (boolean[] selections : mSelections) {
                 for (boolean b : selections) {
-                    i++;
-                    if (i == 0) {
-                        continue;
-                    }
                     if (b) {
                         if (!first) {
                             sb.append("x");
                         } else {
                             first = false;
                         }
-                        sb.append(LANGUAGES[i - 1]);
+                        sb.append(LANGUAGES[i]);
                     }
+                    i++;
                 }
             }
 
@@ -383,11 +382,6 @@ public class ExcludedLanguagesActivity extends ToolbarActivity
         @Override
         public void onBindViewHolder(LanguageHolder holder, int position) {
             holder.language.setText(LANGUAGE_STR_IDS[position]);
-            if (position == 0) {
-                holder.original.setVisibility(View.INVISIBLE);
-            } else {
-                holder.original.setVisibility(View.VISIBLE);
-            }
             boolean[] selections = mSelections[position];
             holder.original.setChecked(selections[0]);
             holder.translated.setChecked(selections[1]);

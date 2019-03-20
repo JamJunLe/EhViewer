@@ -17,10 +17,9 @@
 package com.hippo.ehviewer.preference;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.widget.Toast;
-
+import androidx.annotation.NonNull;
 import com.hippo.ehviewer.EhApplication;
 import com.hippo.ehviewer.R;
 import com.hippo.ehviewer.Settings;
@@ -62,6 +61,9 @@ public class CleanRedundancyPreference extends TaskPreference {
         // True for cleared
         private boolean clearFile(UniFile file) {
             String name = file.getName();
+            if (name == null) {
+                return false;
+            }
             int index = name.indexOf('-');
             if (index >= 0) {
                 name = name.substring(0, index);

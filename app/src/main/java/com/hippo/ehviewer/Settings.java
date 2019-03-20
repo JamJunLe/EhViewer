@@ -16,29 +16,27 @@
 
 package com.hippo.ehviewer;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.preference.PreferenceManager;
-import android.support.annotation.DimenRes;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.util.Log;
-
+import androidx.annotation.DimenRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import com.hippo.ehviewer.client.EhConfig;
 import com.hippo.ehviewer.client.EhUtils;
 import com.hippo.ehviewer.client.data.FavListUrlBuilder;
 import com.hippo.ehviewer.ui.CommonOperations;
 import com.hippo.glgallery.GalleryView;
 import com.hippo.unifile.UniFile;
+import com.hippo.util.ExceptionUtils;
+import com.hippo.yorozuya.AssertUtils;
 import com.hippo.yorozuya.FileUtils;
 import com.hippo.yorozuya.MathUtils;
 import com.hippo.yorozuya.NumberUtils;
-
-import junit.framework.Assert;
-
 import java.io.File;
+import java.util.Locale;
 
 public class Settings {
 
@@ -52,6 +50,16 @@ public class Settings {
         sContext = context.getApplicationContext();
         sSettingsPre = PreferenceManager.getDefaultSharedPreferences(sContext);
         sEhConfig = loadEhConfig();
+        fixDefaultValue(context);
+    }
+
+    private static void fixDefaultValue(Context context) {
+        // Enable builtin hosts if the country is CN
+        if (!sSettingsPre.contains(KEY_BUILT_IN_HOSTS)) {
+            if ("CN".equals(Locale.getDefault().getCountry())) {
+                putBuiltInHosts(true);
+            }
+        }
     }
 
     private static EhConfig loadEhConfig() {
@@ -237,6 +245,28 @@ public class Settings {
     /********************
      ****** Eh
      ********************/
+
+    public static final String KEY_THEME = "theme";
+    public static final int THEME_LIGHT = 0;
+    public static final int THEME_DARK = 1;
+    public static final int THEME_BLACK = 2;
+    private static final int DEFAULT_THEME = THEME_LIGHT;
+
+    public static int getTheme() {
+        return getIntFromStr(KEY_THEME, DEFAULT_THEME);
+    }
+
+    public static void putTheme(int theme) {
+        putIntToStr(KEY_THEME, theme);
+    }
+
+    public static final String KEY_APPLY_NAV_BAR_THEME_COLOR = "apply_nav_bar_theme_color";
+    private static final boolean DEFAULT_APPLY_NAV_BAR_THEME_COLOR = false;
+
+    public static boolean getApplyNavBarThemeColor() {
+        return getBoolean(KEY_APPLY_NAV_BAR_THEME_COLOR, DEFAULT_APPLY_NAV_BAR_THEME_COLOR);
+    }
+
     public static final String KEY_GALLERY_SITE = "gallery_site";
     private static final int DEFAULT_GALLERY_SITE = 1;
 
@@ -300,11 +330,32 @@ public class Settings {
         return getIntFromStr(KEY_THUMB_RESOLUTION, DEFAULT_THUMB_RESOLUTION);
     }
 
+    private static final String KEY_FIX_THUMB_URL = "fix_thumb_url";
+    private static final boolean DEFAULT_FIX_THUMB_URL = false;
+
+    public static boolean getFixThumbUrl() {
+        return getBoolean(KEY_FIX_THUMB_URL, DEFAULT_FIX_THUMB_URL);
+    }
+
     private static final String KEY_SHOW_JPN_TITLE = "show_jpn_title";
     private static final boolean DEFAULT_SHOW_JPN_TITLE = false;
 
     public static boolean getShowJpnTitle() {
         return getBoolean(KEY_SHOW_JPN_TITLE, DEFAULT_SHOW_JPN_TITLE);
+    }
+
+    private static final String KEY_SHOW_GALLERY_PAGES = "show_gallery_pages";
+    private static final boolean DEFAULT_SHOW_GALLERY_PAGES = false;
+
+    public static boolean getShowGalleryPages() {
+        return getBoolean(KEY_SHOW_GALLERY_PAGES, DEFAULT_SHOW_GALLERY_PAGES);
+    }
+
+    public static final String KEY_SHOW_TAG_TRANSLATIONS = "show_tag_translations";
+    private static final boolean DEFAULT_SHOW_TAG_TRANSLATIONS = false;
+
+    public static boolean getShowTagTranslations() {
+        return getBoolean(KEY_SHOW_TAG_TRANSLATIONS, DEFAULT_SHOW_TAG_TRANSLATIONS);
     }
 
     public static final String KEY_DEFAULT_CATEGORIES = "default_categories";
@@ -344,72 +395,6 @@ public class Settings {
         sEhConfig.excludedLanguages = value;
         sEhConfig.setDirty();
         putString(KEY_EXCLUDED_LANGUAGES, value);
-    }
-
-    private static final String KEY_HATH_PROXY = "hath_proxy";
-    private static final boolean DEFAULT_HATH_PROXY = false;
-
-    public static boolean getHathProxy() {
-        return getBoolean(KEY_HATH_PROXY, DEFAULT_HATH_PROXY);
-    }
-
-    public static void putHathProxy(boolean value) {
-        if (value) {
-            sEhConfig.hahClientIp = Settings.getHathIp();
-            sEhConfig.hahClientPort = Settings.getHathPort();
-            sEhConfig.hahClientPasskey = Settings.getHathPasskey();
-        } else {
-            sEhConfig.hahClientIp = DEFAULT_HATH_IP;
-            sEhConfig.hahClientPort = DEFAULT_HATH_PORT;
-            sEhConfig.hahClientPasskey = DEFAULT_HATH_PASSKEY;
-        }
-        sEhConfig.setDirty();
-        putBoolean(KEY_HATH_PROXY, value);
-    }
-
-    private static final String KEY_HATH_IP = "hath_ip";
-    private static final String DEFAULT_HATH_IP = null;
-
-    public static String getHathIp() {
-        return getString(KEY_HATH_IP, DEFAULT_HATH_IP);
-    }
-
-    public static void putHathIp(String value) {
-        if (Settings.getHathProxy()) {
-            sEhConfig.hahClientIp = value;
-            sEhConfig.setDirty();
-        }
-        putString(KEY_HATH_IP, value);
-    }
-
-    private static final String KEY_HATH_PORT = "hath_port";
-    private static final int DEFAULT_HATH_PORT = -1;
-
-    public static int getHathPort() {
-        return getInt(KEY_HATH_PORT, DEFAULT_HATH_PORT);
-    }
-
-    public static void putHathPort(int value) {
-        if (Settings.getHathProxy()) {
-            sEhConfig.hahClientPort = value;
-            sEhConfig.setDirty();
-        }
-        putInt(KEY_HATH_PORT, value);
-    }
-
-    private static final String KEY_HATH_PASSKEY = "hath_passkey";
-    private static final String DEFAULT_HATH_PASSKEY = null;
-
-    public static String getHathPasskey() {
-        return getString(KEY_HATH_PASSKEY, DEFAULT_HATH_PASSKEY);
-    }
-
-    public static void putHathPasskey(String value) {
-        if (Settings.getHathProxy()) {
-            sEhConfig.hahClientPasskey = value;
-            sEhConfig.setDirty();
-        }
-        putString(KEY_HATH_PASSKEY, value);
     }
 
     private static final String KEY_CELLULAR_NETWORK_WARNING = "cellular_network_warning";
@@ -513,6 +498,17 @@ public class Settings {
         putBoolean(KEY_SHOW_BATTERY, value);
     }
 
+    private static final String KEY_SHOW_PAGE_INTERVAL = "gallery_show_page_interval";
+    private static final boolean DEFAULT_SHOW_PAGE_INTERVAL = true;
+
+    public static boolean getShowPageInterval() {
+        return getBoolean(KEY_SHOW_PAGE_INTERVAL, DEFAULT_SHOW_PAGE_INTERVAL);
+    }
+
+    public static void putShowPageInterval(boolean value) {
+        putBoolean(KEY_SHOW_PAGE_INTERVAL, value);
+    }
+
     private static final String KEY_VOLUME_PAGE = "volume_page";
     private static final boolean DEFAULT_VOLUME_PAGE = false;
 
@@ -558,6 +554,19 @@ public class Settings {
     }
 
     /********************
+     ****** Privacy and Security
+     ********************/
+    public static final String KEY_SEC_SECURITY = "enable_secure";
+    public static final boolean VALUE_SEC_SECURITY = false;
+
+    public static boolean getEnabledSecurity() {
+        return getBoolean(KEY_SEC_SECURITY, VALUE_SEC_SECURITY);
+    }
+    public static void putEnabledSecurity(boolean value) {
+        putBoolean(KEY_READING_FULLSCREEN, value);
+    }
+
+    /********************
      ****** Download
      ********************/
     public static final String KEY_DOWNLOAD_SAVE_SCHEME = "image_scheme";
@@ -577,7 +586,8 @@ public class Settings {
             builder.encodedQuery(getString(KEY_DOWNLOAD_SAVE_QUERY, null));
             builder.encodedFragment(getString(KEY_DOWNLOAD_SAVE_FRAGMENT, null));
             dir = UniFile.fromUri(sContext, builder.build());
-        } catch (Exception e) {
+        } catch (Throwable e) {
+            ExceptionUtils.throwIfFatal(e);
             // Ignore
         }
         return dir != null ? dir : UniFile.fromFile(AppConfig.getDefaultDownloadDir());
@@ -687,26 +697,42 @@ public class Settings {
     /********************
      ****** Favorites
      ********************/
-    public static final String KEY_FAV_CAT_0 = "fav_cat_0";
-    public static final String KEY_FAV_CAT_1 = "fav_cat_1";
-    public static final String KEY_FAV_CAT_2 = "fav_cat_2";
-    public static final String KEY_FAV_CAT_3 = "fav_cat_3";
-    public static final String KEY_FAV_CAT_4 = "fav_cat_4";
-    public static final String KEY_FAV_CAT_5 = "fav_cat_5";
-    public static final String KEY_FAV_CAT_6 = "fav_cat_6";
-    public static final String KEY_FAV_CAT_7 = "fav_cat_7";
-    public static final String KEY_FAV_CAT_8 = "fav_cat_8";
-    public static final String KEY_FAV_CAT_9 = "fav_cat_9";
-    public static final String DEFAULT_FAV_CAT_0 = "Favorites 0";
-    public static final String DEFAULT_FAV_CAT_1 = "Favorites 1";
-    public static final String DEFAULT_FAV_CAT_2 = "Favorites 2";
-    public static final String DEFAULT_FAV_CAT_3 = "Favorites 3";
-    public static final String DEFAULT_FAV_CAT_4 = "Favorites 4";
-    public static final String DEFAULT_FAV_CAT_5 = "Favorites 5";
-    public static final String DEFAULT_FAV_CAT_6 = "Favorites 6";
-    public static final String DEFAULT_FAV_CAT_7 = "Favorites 7";
-    public static final String DEFAULT_FAV_CAT_8 = "Favorites 8";
-    public static final String DEFAULT_FAV_CAT_9 = "Favorites 9";
+    private static final String KEY_FAV_CAT_0 = "fav_cat_0";
+    private static final String KEY_FAV_CAT_1 = "fav_cat_1";
+    private static final String KEY_FAV_CAT_2 = "fav_cat_2";
+    private static final String KEY_FAV_CAT_3 = "fav_cat_3";
+    private static final String KEY_FAV_CAT_4 = "fav_cat_4";
+    private static final String KEY_FAV_CAT_5 = "fav_cat_5";
+    private static final String KEY_FAV_CAT_6 = "fav_cat_6";
+    private static final String KEY_FAV_CAT_7 = "fav_cat_7";
+    private static final String KEY_FAV_CAT_8 = "fav_cat_8";
+    private static final String KEY_FAV_CAT_9 = "fav_cat_9";
+    private static final String DEFAULT_FAV_CAT_0 = "Favorites 0";
+    private static final String DEFAULT_FAV_CAT_1 = "Favorites 1";
+    private static final String DEFAULT_FAV_CAT_2 = "Favorites 2";
+    private static final String DEFAULT_FAV_CAT_3 = "Favorites 3";
+    private static final String DEFAULT_FAV_CAT_4 = "Favorites 4";
+    private static final String DEFAULT_FAV_CAT_5 = "Favorites 5";
+    private static final String DEFAULT_FAV_CAT_6 = "Favorites 6";
+    private static final String DEFAULT_FAV_CAT_7 = "Favorites 7";
+    private static final String DEFAULT_FAV_CAT_8 = "Favorites 8";
+    private static final String DEFAULT_FAV_CAT_9 = "Favorites 9";
+
+    private static final String KEY_FAV_COUNT_0 = "fav_count_0";
+    private static final String KEY_FAV_COUNT_1 = "fav_count_1";
+    private static final String KEY_FAV_COUNT_2 = "fav_count_2";
+    private static final String KEY_FAV_COUNT_3 = "fav_count_3";
+    private static final String KEY_FAV_COUNT_4 = "fav_count_4";
+    private static final String KEY_FAV_COUNT_5 = "fav_count_5";
+    private static final String KEY_FAV_COUNT_6 = "fav_count_6";
+    private static final String KEY_FAV_COUNT_7 = "fav_count_7";
+    private static final String KEY_FAV_COUNT_8 = "fav_count_8";
+    private static final String KEY_FAV_COUNT_9 = "fav_count_9";
+
+    private static final String KEY_FAV_LOCAL = "fav_local";
+    private static final String KEY_FAV_CLOUD = "fav_cloud";
+
+    private static final int DEFAULT_FAV_COUNT = 0;
 
     public static String[] getFavCat() {
         String[] favCat = new String[10];
@@ -724,7 +750,7 @@ public class Settings {
     }
 
     public static void putFavCat(String[] value) {
-        Assert.assertEquals(10, value.length);
+        AssertUtils.assertEquals(10, value.length);
         sSettingsPre.edit()
                 .putString(KEY_FAV_CAT_0, value[0])
                 .putString(KEY_FAV_CAT_1, value[1])
@@ -737,6 +763,53 @@ public class Settings {
                 .putString(KEY_FAV_CAT_8, value[8])
                 .putString(KEY_FAV_CAT_9, value[9])
                 .apply();
+    }
+
+    public static int[] getFavCount() {
+        int[] favCount = new int[10];
+        favCount[0] = sSettingsPre.getInt(KEY_FAV_COUNT_0, DEFAULT_FAV_COUNT);
+        favCount[1] = sSettingsPre.getInt(KEY_FAV_COUNT_1, DEFAULT_FAV_COUNT);
+        favCount[2] = sSettingsPre.getInt(KEY_FAV_COUNT_2, DEFAULT_FAV_COUNT);
+        favCount[3] = sSettingsPre.getInt(KEY_FAV_COUNT_3, DEFAULT_FAV_COUNT);
+        favCount[4] = sSettingsPre.getInt(KEY_FAV_COUNT_4, DEFAULT_FAV_COUNT);
+        favCount[5] = sSettingsPre.getInt(KEY_FAV_COUNT_5, DEFAULT_FAV_COUNT);
+        favCount[6] = sSettingsPre.getInt(KEY_FAV_COUNT_6, DEFAULT_FAV_COUNT);
+        favCount[7] = sSettingsPre.getInt(KEY_FAV_COUNT_7, DEFAULT_FAV_COUNT);
+        favCount[8] = sSettingsPre.getInt(KEY_FAV_COUNT_8, DEFAULT_FAV_COUNT);
+        favCount[9] = sSettingsPre.getInt(KEY_FAV_COUNT_9, DEFAULT_FAV_COUNT);
+        return favCount;
+    }
+
+    public static void putFavCount(int[] count) {
+        AssertUtils.assertEquals(10, count.length);
+        sSettingsPre.edit()
+                .putInt(KEY_FAV_COUNT_0, count[0])
+                .putInt(KEY_FAV_COUNT_1, count[1])
+                .putInt(KEY_FAV_COUNT_2, count[2])
+                .putInt(KEY_FAV_COUNT_3, count[3])
+                .putInt(KEY_FAV_COUNT_4, count[4])
+                .putInt(KEY_FAV_COUNT_5, count[5])
+                .putInt(KEY_FAV_COUNT_6, count[6])
+                .putInt(KEY_FAV_COUNT_7, count[7])
+                .putInt(KEY_FAV_COUNT_8, count[8])
+                .putInt(KEY_FAV_COUNT_9, count[9])
+                .apply();
+    }
+
+    public static int getFavLocalCount() {
+        return sSettingsPre.getInt(KEY_FAV_LOCAL, DEFAULT_FAV_COUNT);
+    }
+
+    public static void putFavLocalCount(int count) {
+        sSettingsPre.edit().putInt(KEY_FAV_LOCAL, count).apply();
+    }
+
+    public static int getFavCloudCount() {
+        return sSettingsPre.getInt(KEY_FAV_CLOUD, DEFAULT_FAV_COUNT);
+    }
+
+    public static void putFavCloudCount(int count) {
+        sSettingsPre.edit().putInt(KEY_FAV_CLOUD, count).apply();
     }
 
     private static final String KEY_RECENT_FAV_CAT = "recent_fav_cat";
@@ -855,6 +928,8 @@ public class Settings {
      ********************/
     private static final String KEY_BETA_UPDATE_CHANNEL = "beta_update_channel";
     private static final boolean DEFAULT_BETA_UPDATE_CHANNEL = EhApplication.BETA;
+    private static final String KEY_SKIP_UPDATE_VERSION = "skip_update_version";
+    private static final int DEFAULT_SKIP_UPDATE_VERSION = 0;
 
     public static boolean getBetaUpdateChannel() {
         return getBoolean(KEY_BETA_UPDATE_CHANNEL, DEFAULT_BETA_UPDATE_CHANNEL);
@@ -864,19 +939,12 @@ public class Settings {
         putBoolean(KEY_BETA_UPDATE_CHANNEL, value);
     }
 
-    /********************
-     ****** Crash
-     ********************/
-    private static final String KEY_CRASH_FILENAME = "crash_filename";
-    private static final String DEFAULT_CRASH_FILENAME = null;
-
-    public static String getCrashFilename() {
-        return getString(KEY_CRASH_FILENAME, DEFAULT_CRASH_FILENAME);
+    public static int getSkipUpdateVersion() {
+        return getInt(KEY_SKIP_UPDATE_VERSION, DEFAULT_SKIP_UPDATE_VERSION);
     }
 
-    @SuppressLint("CommitPrefEdits")
-    public static void putCrashFilename(String value) {
-        sSettingsPre.edit().putString(KEY_CRASH_FILENAME, value).commit();
+    public static void putSkipUpdateVersion(int value) {
+        putInt(KEY_SKIP_UPDATE_VERSION, value);
     }
 
     /********************
@@ -893,6 +961,13 @@ public class Settings {
         putBoolean(KEY_SAVE_PARSE_ERROR_BODY, value);
     }
 
+    private static final String KEY_SAVE_CRASH_LOG = "save_crash_log";
+    private static final boolean DEFAULT_SAVE_CRASH_LOG = false;
+
+    public static boolean getSaveCrashLog() {
+        return getBoolean(KEY_SAVE_CRASH_LOG, DEFAULT_SAVE_CRASH_LOG);
+    }
+
     public static final String KEY_SECURITY = "security";
     public static final String DEFAULT_SECURITY = "";
 
@@ -904,11 +979,76 @@ public class Settings {
         putString(KEY_SECURITY, value);
     }
 
+    public static final String KEY_ENABLE_FINGERPRINT = "enable_fingerprint";
+
+    public static boolean getEnableFingerprint() {
+        return getBoolean(KEY_ENABLE_FINGERPRINT, false);
+    }
+
+    public static void putEnableFingerprint(boolean value) {
+        putBoolean(KEY_ENABLE_FINGERPRINT, value);
+    }
+
     public static final String KEY_READ_CACHE_SIZE = "read_cache_size";
     public static final int DEFAULT_READ_CACHE_SIZE = 160;
 
     public static int getReadCacheSize() {
         return getIntFromStr(KEY_READ_CACHE_SIZE, DEFAULT_READ_CACHE_SIZE);
+    }
+
+    public static final String KEY_BUILT_IN_HOSTS = "built_in_hosts";
+    private static final boolean DEFAULT_BUILT_IN_HOSTS = false;
+
+    public static boolean getBuiltInHosts() {
+        return getBoolean(KEY_BUILT_IN_HOSTS, DEFAULT_BUILT_IN_HOSTS);
+    }
+
+    public static void putBuiltInHosts(boolean value) {
+        putBoolean(KEY_BUILT_IN_HOSTS, value);
+    }
+
+    public static final String KEY_APP_LANGUAGE = "app_language";
+    private static final String DEFAULT_APP_LANGUAGE = "system";
+
+    public static String getAppLanguage() {
+        return getString(KEY_APP_LANGUAGE, DEFAULT_APP_LANGUAGE);
+    }
+
+    public static void putAppLanguage(String value) {
+        putString(KEY_APP_LANGUAGE, value);
+    }
+
+    private static final String KEY_PROXY_TYPE = "proxy_type";
+    private static final int DEFAULT_PROXY_TYPE = EhProxySelector.TYPE_SYSTEM;
+
+    public static int getProxyType() {
+        return getInt(KEY_PROXY_TYPE, DEFAULT_PROXY_TYPE);
+    }
+
+    public static void putProxyType(int value) {
+        putInt(KEY_PROXY_TYPE, value);
+    }
+
+    private static final String KEY_PROXY_IP = "proxy_ip";
+    private static final String DEFAULT_PROXY_IP = null;
+
+    public static String getProxyIp() {
+        return getString(KEY_PROXY_IP, DEFAULT_PROXY_IP);
+    }
+
+    public static void putProxyIp(String value) {
+        putString(KEY_PROXY_IP, value);
+    }
+
+    private static final String KEY_PROXY_PORT = "proxy_port";
+    private static final int DEFAULT_PROXY_PORT = -1;
+
+    public static int getProxyPort() {
+        return getInt(KEY_PROXY_PORT, DEFAULT_PROXY_PORT);
+    }
+
+    public static void putProxyPort(int value) {
+        putInt(KEY_PROXY_PORT, value);
     }
 
     /********************
@@ -967,5 +1107,16 @@ public class Settings {
 
     public static void putGuideGallery(boolean value) {
         putBoolean(KEY_GUIDE_GALLERY, value);
+    }
+
+    private static final String KEY_CLIPBOARD_TEXT_HASH_CODE = "clipboard_text_hash_code";
+    private static final int DEFAULT_CLIPBOARD_TEXT_HASH_CODE = 0;
+
+    public static int getClipboardTextHashCode() {
+        return getInt(KEY_CLIPBOARD_TEXT_HASH_CODE, DEFAULT_CLIPBOARD_TEXT_HASH_CODE);
+    }
+
+    public static void putClipboardTextHashCode(int value) {
+        putInt(KEY_CLIPBOARD_TEXT_HASH_CODE, value);
     }
 }

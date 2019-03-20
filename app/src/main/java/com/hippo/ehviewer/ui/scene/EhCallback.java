@@ -17,9 +17,8 @@
 package com.hippo.ehviewer.ui.scene;
 
 import android.content.Context;
-import android.support.annotation.StringRes;
 import android.widget.Toast;
-
+import androidx.annotation.StringRes;
 import com.hippo.ehviewer.EhApplication;
 import com.hippo.ehviewer.client.EhClient;
 import com.hippo.ehviewer.ui.MainActivity;
@@ -39,6 +38,14 @@ public abstract class EhCallback<E extends SceneFragment, T> implements EhClient
     }
 
     public abstract boolean isInstance(SceneFragment scene);
+
+    public Context getContent() {
+        Context context = getStageActivity();
+        if (context == null) {
+            context = getApplication();
+        }
+        return context;
+    }
 
     public EhApplication getApplication() {
         return mApplication;
@@ -68,6 +75,16 @@ public abstract class EhCallback<E extends SceneFragment, T> implements EhClient
             ((MainActivity) activity).showTip(id, length);
         } else {
             Toast.makeText(getApplication(), id,
+                    length == BaseScene.LENGTH_LONG ? Toast.LENGTH_LONG : Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void showTip(String tip, int length) {
+        StageActivity activity = getStageActivity();
+        if (activity instanceof MainActivity) {
+            ((MainActivity) activity).showTip(tip, length);
+        } else {
+            Toast.makeText(getApplication(), tip,
                     length == BaseScene.LENGTH_LONG ? Toast.LENGTH_LONG : Toast.LENGTH_SHORT).show();
         }
     }

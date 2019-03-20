@@ -17,13 +17,9 @@
 package com.hippo.ehviewer.ui;
 
 import android.content.DialogInterface;
+import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.design.widget.TextInputLayout;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,7 +29,11 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
-
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.material.textfield.TextInputLayout;
 import com.hippo.easyrecyclerview.EasyRecyclerView;
 import com.hippo.ehviewer.R;
 import com.hippo.ehviewer.client.EhFilter;
@@ -41,7 +41,6 @@ import com.hippo.ehviewer.dao.Filter;
 import com.hippo.util.DrawableManager;
 import com.hippo.view.ViewTransition;
 import com.hippo.yorozuya.ViewUtils;
-
 import java.util.List;
 
 public class FilterActivity extends ToolbarActivity {
@@ -67,7 +66,7 @@ public class FilterActivity extends ToolbarActivity {
         TextView tip = (TextView) ViewUtils.$$(this, R.id.tip);
         mViewTransition = new ViewTransition(mRecyclerView, tip);
 
-        Drawable drawable = DrawableManager.getDrawable(this, R.drawable.big_filter);
+        Drawable drawable = DrawableManager.getVectorDrawable(this, R.drawable.big_filter);
         drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
         tip.setCompoundDrawables(null, drawable, null, null);
 
@@ -77,6 +76,7 @@ public class FilterActivity extends ToolbarActivity {
         mRecyclerView.setClipChildren(false);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.hasFixedSize();
+        mRecyclerView.setItemAnimator(null);
 
         updateView(false);
     }
@@ -247,6 +247,8 @@ public class FilterActivity extends ToolbarActivity {
             if (null != icon) {
                 icon.setOnClickListener(this);
             }
+            // click on the filter text to enable/disable it
+            text.setOnClickListener(this);
         }
 
         @Override
@@ -257,7 +259,15 @@ public class FilterActivity extends ToolbarActivity {
             }
             Filter filter = mFilterList.get(position);
             if (FilterList.MODE_HEADER != filter.mode) {
-                showDeleteFilterDialog(filter);
+                if (v instanceof ImageView) {
+                    showDeleteFilterDialog(filter);
+                } else if (v instanceof TextView) {
+                    mFilterList.trigger(filter);
+
+                    //for updating delete line on filter text
+                    mAdapter.notifyItemChanged(getAdapterPosition());
+                }
+
             }
         }
     }
@@ -297,7 +307,7 @@ public class FilterActivity extends ToolbarActivity {
 
             if (R.layout.item_filter == layoutId) {
                 holder.icon.setImageDrawable(
-                        DrawableManager.getDrawable(FilterActivity.this, R.drawable.v_delete_x24));
+                        DrawableManager.getVectorDrawable(FilterActivity.this, R.drawable.v_delete_x24));
             }
 
             return holder;
@@ -314,12 +324,18 @@ public class FilterActivity extends ToolbarActivity {
                 holder.text.setText(filter.text);
             } else {
                 holder.text.setText(filter.text);
+                // add a delete line if the filter is disabled
+                if (!filter.enable) {
+                    holder.text.setPaintFlags(holder.text.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                } else {
+                    holder.text.setPaintFlags(holder.text.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+                }
             }
         }
 
         @Override
         public int getItemCount() {
-            return null != mFilterList ? mFilterList.size(): 0;
+            return null != mFilterList ? mFilterList.size() : 0;
         }
     }
 
@@ -449,6 +465,10 @@ public class FilterActivity extends ToolbarActivity {
 
         public void delete(Filter filter) {
             mEhFilter.deleteFilter(filter);
+        }
+
+        public void trigger(Filter filter) {
+            mEhFilter.triggerFilter(filter);
         }
     }
 }

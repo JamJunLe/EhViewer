@@ -17,11 +17,12 @@
 package com.hippo.ehviewer.widget;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.v7.widget.AppCompatEditText;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import androidx.annotation.NonNull;
+import androidx.appcompat.widget.AppCompatEditText;
+import com.hippo.util.ExceptionUtils;
 
 public class SearchEditText extends AppCompatEditText {
 
@@ -76,7 +77,14 @@ public class SearchEditText extends AppCompatEditText {
         if (event.getAction() == MotionEvent.ACTION_UP && mListener != null) {
             mListener.onClick();
         }
-        return super.onTouchEvent(event);
+        try {
+            return super.onTouchEvent(event);
+        } catch (Throwable t) {
+            // Some devices crash here.
+            // I don't why.
+            ExceptionUtils.throwIfFatal(t);
+            return false;
+        }
     }
 
     public interface SearchEditTextListener {

@@ -17,6 +17,9 @@
 package com.hippo.ehviewer.ui;
 
 import android.Manifest;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -25,33 +28,35 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PersistableBundle;
-import android.support.annotation.IdRes;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
-import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import androidx.annotation.IdRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
+import androidx.appcompat.app.AlertDialog;
+import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.snackbar.Snackbar;
 import com.hippo.drawerlayout.DrawerLayout;
 import com.hippo.ehviewer.AppConfig;
-import com.hippo.ehviewer.Crash;
+import com.hippo.ehviewer.EhApplication;
 import com.hippo.ehviewer.R;
 import com.hippo.ehviewer.Settings;
+import com.hippo.ehviewer.client.EhTagDatabase;
 import com.hippo.ehviewer.client.EhUrlOpener;
 import com.hippo.ehviewer.client.EhUtils;
 import com.hippo.ehviewer.client.data.ListUrlBuilder;
+import com.hippo.ehviewer.client.parser.GalleryDetailUrlParser;
+import com.hippo.ehviewer.client.parser.GalleryPageUrlParser;
 import com.hippo.ehviewer.ui.scene.AnalyticsScene;
 import com.hippo.ehviewer.ui.scene.BaseScene;
 import com.hippo.ehviewer.ui.scene.CookieSignInScene;
-import com.hippo.ehviewer.ui.scene.CrashScene;
 import com.hippo.ehviewer.ui.scene.DownloadLabelsScene;
 import com.hippo.ehviewer.ui.scene.DownloadsScene;
 import com.hippo.ehviewer.ui.scene.FavoritesScene;
@@ -81,8 +86,8 @@ import com.hippo.util.PermissionRequester;
 import com.hippo.widget.LoadImageView;
 import com.hippo.yorozuya.IOUtils;
 import com.hippo.yorozuya.ResourcesUtils;
+import com.hippo.yorozuya.SimpleHandler;
 import com.hippo.yorozuya.ViewUtils;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -96,6 +101,7 @@ public final class MainActivity extends StageActivity
     private static final int REQUEST_CODE_SETTINGS = 0;
 
     private static final String KEY_NAV_CHECKED_ITEM = "nav_checked_item";
+    private static final String KEY_CLIP_TEXT_HASH_CODE = "clip_text_hash_code";
 
     /*---------------
      Whole life cycle
@@ -110,6 +116,8 @@ public final class MainActivity extends StageActivity
     private LoadImageView mAvatar;
     @Nullable
     private TextView mDisplayName;
+    @Nullable
+    private Button mChangeTheme;
 
     private int mNavCheckedItem = 0;
 
@@ -117,7 +125,6 @@ public final class MainActivity extends StageActivity
         registerLaunchMode(SecurityScene.class, SceneFragment.LAUNCH_MODE_SINGLE_TASK);
         registerLaunchMode(WarningScene.class, SceneFragment.LAUNCH_MODE_SINGLE_TASK);
         registerLaunchMode(AnalyticsScene.class, SceneFragment.LAUNCH_MODE_SINGLE_TASK);
-        registerLaunchMode(CrashScene.class, SceneFragment.LAUNCH_MODE_SINGLE_TASK);
         registerLaunchMode(SignInScene.class, SceneFragment.LAUNCH_MODE_SINGLE_TASK);
         registerLaunchMode(WebViewSignInScene.class, SceneFragment.LAUNCH_MODE_SINGLE_TASK);
         registerLaunchMode(CookieSignInScene.class, SceneFragment.LAUNCH_MODE_SINGLE_TASK);
@@ -136,6 +143,19 @@ public final class MainActivity extends StageActivity
     }
 
     @Override
+    protected int getThemeResId(int theme) {
+        switch (theme) {
+            case Settings.THEME_LIGHT:
+            default:
+                return R.style.AppTheme_Main;
+            case Settings.THEME_DARK:
+                return R.style.AppTheme_Main_Dark;
+            case Settings.THEME_BLACK:
+                return R.style.AppTheme_Main_Black;
+        }
+    }
+
+    @Override
     public int getContainerViewId() {
         return R.id.fragment_container;
     }
@@ -149,8 +169,6 @@ public final class MainActivity extends StageActivity
             return new Announcer(WarningScene.class);
         } else if (Settings.getAskAnalytics()) {
             return new Announcer(AnalyticsScene.class);
-        } else if (Crash.hasCrashFile()) {
-            return new Announcer(CrashScene.class);
         } else if (EhUtils.needSignedIn(this)) {
             return new Announcer(SignInScene.class);
         } else if (Settings.getSelectSite()) {
@@ -180,11 +198,6 @@ public final class MainActivity extends StageActivity
                 newArgs.putString(AnalyticsScene.KEY_TARGET_SCENE, announcer.getClazz().getName());
                 newArgs.putBundle(AnalyticsScene.KEY_TARGET_ARGS, announcer.getArgs());
                 return new Announcer(AnalyticsScene.class).setArgs(newArgs);
-            } else if (Crash.hasCrashFile()) {
-                Bundle newArgs = new Bundle();
-                newArgs.putString(CrashScene.KEY_TARGET_SCENE, announcer.getClazz().getName());
-                newArgs.putBundle(CrashScene.KEY_TARGET_ARGS, announcer.getArgs());
-                return new Announcer(CrashScene.class).setArgs(newArgs);
             } else if (EhUtils.needSignedIn(this)) {
                 Bundle newArgs = new Bundle();
                 newArgs.putString(SignInScene.KEY_TARGET_SCENE, announcer.getClazz().getName());
@@ -239,7 +252,11 @@ public final class MainActivity extends StageActivity
 
         String action = intent.getAction();
         if (Intent.ACTION_VIEW.equals(action)) {
-            Announcer announcer = EhUrlOpener.parseUrl(intent.getData().toString());
+            Uri uri = intent.getData();
+            if (uri == null) {
+                return false;
+            }
+            Announcer announcer = EhUrlOpener.parseUrl(uri.toString());
             if (announcer != null) {
                 startScene(processAnnouncer(announcer));
                 return true;
@@ -315,6 +332,7 @@ public final class MainActivity extends StageActivity
         View headerLayout = mNavView.getHeaderView(0);
         mAvatar = (LoadImageView) ViewUtils.$$(headerLayout, R.id.avatar);
         mDisplayName = (TextView) ViewUtils.$$(headerLayout, R.id.display_name);
+        mChangeTheme = (Button) ViewUtils.$$(this, R.id.change_theme);
 
         mDrawerLayout.setStatusBarColor(ResourcesUtils.getAttrColor(this, R.attr.colorPrimaryDark));
         // Pre-L need shadow drawable
@@ -329,6 +347,12 @@ public final class MainActivity extends StageActivity
             mNavView.setNavigationItemSelectedListener(this);
         }
 
+        mChangeTheme.setText(getThemeText());
+        mChangeTheme.setOnClickListener(v -> {
+            Settings.putTheme(getNextTheme());
+            ((EhApplication) getApplication()).recreate();
+        });
+
         if (savedInstanceState == null) {
             onInit();
             CommonOperations.checkUpdate(this, false);
@@ -338,6 +362,37 @@ public final class MainActivity extends StageActivity
             }
         } else {
             onRestore(savedInstanceState);
+        }
+
+        EhTagDatabase.update(this);
+    }
+
+    private String getThemeText() {
+        int resId;
+        switch (Settings.getTheme()) {
+            default:
+            case Settings.THEME_LIGHT:
+                resId = R.string.theme_light;
+                break;
+            case Settings.THEME_DARK:
+                resId = R.string.theme_dark;
+                break;
+            case Settings.THEME_BLACK:
+                resId = R.string.theme_black;
+                break;
+        }
+        return getString(resId);
+    }
+
+    private int getNextTheme() {
+        switch (Settings.getTheme()) {
+            default:
+            case Settings.THEME_LIGHT:
+                return Settings.THEME_DARK;
+            case Settings.THEME_DARK:
+                return Settings.THEME_BLACK;
+            case Settings.THEME_BLACK:
+                return Settings.THEME_LIGHT;
         }
     }
 
@@ -392,6 +447,79 @@ public final class MainActivity extends StageActivity
         super.onResume();
 
         setNavCheckedItem(mNavCheckedItem);
+
+        checkClipboardUrl();
+    }
+
+    @Override
+    protected void onTransactScene() {
+        super.onTransactScene();
+
+        checkClipboardUrl();
+    }
+
+    private void checkClipboardUrl() {
+        SimpleHandler.getInstance().postDelayed(() -> {
+            if (!isSolid()) {
+                checkClipboardUrlInternal();
+            }
+        }, 300);
+    }
+
+    private boolean isSolid() {
+        Class<?> topClass = getTopSceneClass();
+        return topClass == null || SolidScene.class.isAssignableFrom(topClass);
+    }
+
+    private String getTextFromClipboard() {
+        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        if (clipboard != null) {
+            ClipData clip = clipboard.getPrimaryClip();
+            if (clip != null && clip.getItemCount() > 0 && clip.getItemAt(0).getText() != null) {
+                return clip.getItemAt(0).getText().toString();
+            }
+        }
+        return null;
+    }
+
+    @Nullable
+    private Announcer createAnnouncerFromClipboardUrl(String url) {
+        GalleryDetailUrlParser.Result result1 = GalleryDetailUrlParser.parse(url, false);
+        if (result1 != null) {
+            Bundle args = new Bundle();
+            args.putString(GalleryDetailScene.KEY_ACTION, GalleryDetailScene.ACTION_GID_TOKEN);
+            args.putLong(GalleryDetailScene.KEY_GID, result1.gid);
+            args.putString(GalleryDetailScene.KEY_TOKEN, result1.token);
+            return new Announcer(GalleryDetailScene.class).setArgs(args);
+        }
+
+        GalleryPageUrlParser.Result result2 = GalleryPageUrlParser.parse(url, false);
+        if (result2 != null) {
+            Bundle args = new Bundle();
+            args.putString(ProgressScene.KEY_ACTION, ProgressScene.ACTION_GALLERY_TOKEN);
+            args.putLong(ProgressScene.KEY_GID, result2.gid);
+            args.putString(ProgressScene.KEY_PTOKEN, result2.pToken);
+            args.putInt(ProgressScene.KEY_PAGE, result2.page);
+            return new Announcer(ProgressScene.class).setArgs(args);
+        }
+
+        return null;
+    }
+
+    private void checkClipboardUrlInternal() {
+        String text = getTextFromClipboard();
+        int hashCode = text != null ? text.hashCode() : 0;
+
+        if (text != null && hashCode != 0 && Settings.getClipboardTextHashCode() != hashCode) {
+            Announcer announcer = createAnnouncerFromClipboardUrl(text);
+            if (announcer != null && mDrawerLayout != null) {
+                Snackbar snackbar = Snackbar.make(mDrawerLayout, R.string.clipboard_gallery_url_snack_message, Snackbar.LENGTH_INDEFINITE);
+                snackbar.setAction(R.string.clipboard_gallery_url_snack_action, v -> startScene(announcer));
+                snackbar.show();
+            }
+        }
+
+        Settings.putClipboardTextHashCode(hashCode);
     }
 
     @Override
@@ -413,7 +541,7 @@ public final class MainActivity extends StageActivity
         if (scene instanceof BaseScene && mRightDrawer != null && mDrawerLayout != null) {
             BaseScene baseScene = (BaseScene) scene;
             mRightDrawer.removeAllViews();
-            View drawerView = baseScene.onCreateDrawerView(
+            View drawerView = baseScene.createDrawerView(
                     baseScene.getLayoutInflater2(), mRightDrawer, savedInstanceState);
             if (drawerView != null) {
                 mRightDrawer.addView(drawerView);
@@ -430,7 +558,7 @@ public final class MainActivity extends StageActivity
 
         if (scene instanceof BaseScene) {
             BaseScene baseScene = (BaseScene) scene;
-            baseScene.onDestroyDrawerView();
+            baseScene.destroyDrawerView();
         }
     }
 
@@ -501,6 +629,20 @@ public final class MainActivity extends StageActivity
         }
     }
 
+    public void setDrawerGestureBlocker(DrawerLayout.GestureBlocker gestureBlocker) {
+        if (mDrawerLayout != null) {
+            mDrawerLayout.setGestureBlocker(gestureBlocker);
+        }
+    }
+
+    public boolean isDrawersVisible() {
+        if (mDrawerLayout != null) {
+            return mDrawerLayout.isDrawersVisible();
+        } else {
+            return false;
+        }
+    }
+
     public void setNavCheckedItem(@IdRes int resId) {
         mNavCheckedItem = resId;
         if (mNavView != null) {
@@ -522,7 +664,7 @@ public final class MainActivity extends StageActivity
     public void showTip(CharSequence message, int length) {
         if (null != mDrawerLayout) {
             Snackbar.make(mDrawerLayout, message,
-                    length == BaseScene.LENGTH_LONG ? Snackbar.LENGTH_LONG : Snackbar.LENGTH_SHORT).show();
+                    length == BaseScene.LENGTH_LONG ? 5000 : 3000).show();
         } else {
             Toast.makeText(this, message,
                     length == BaseScene.LENGTH_LONG ? Toast.LENGTH_LONG : Toast.LENGTH_SHORT).show();

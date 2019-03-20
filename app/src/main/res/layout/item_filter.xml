@@ -25,7 +25,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="@android:color/white">
+        android:background="?attr/contentColorPrimary">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -49,14 +49,14 @@
                 android:singleLine="true"
                 android:ellipsize="end"
                 android:textSize="@dimen/text_little_small"
-                android:textColor="@color/primary_text_light"/>
+                android:textColor="?android:attr/textColorPrimary"/>
 
         </LinearLayout>
 
         <View
             android:layout_width="wrap_content"
             android:layout_height="1dp"
-            android:background="@color/divider"/>
+            android:background="?attr/dividerColor"/>
 
     </com.hippo.widget.ShadowLinearLayout>
 </FrameLayout>

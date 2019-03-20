@@ -18,10 +18,9 @@ package com.hippo.ehviewer.client.data;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.IntDef;
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
-
+import androidx.annotation.IntDef;
+import androidx.annotation.Nullable;
 import com.hippo.ehviewer.client.EhConfig;
 import com.hippo.ehviewer.client.EhUrl;
 import com.hippo.ehviewer.client.EhUtils;
@@ -29,7 +28,6 @@ import com.hippo.ehviewer.dao.QuickSearch;
 import com.hippo.ehviewer.widget.AdvanceSearchTable;
 import com.hippo.network.UrlBuilder;
 import com.hippo.yorozuya.StringUtils;
-
 import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -308,7 +306,7 @@ public class ListUrlBuilder implements Cloneable, Parcelable {
             } else if ("f_search".equals(key)) {
                 try {
                     keyword = URLDecoder.decode(value, "utf-8");
-                } catch (UnsupportedEncodingException e) {
+                } catch (UnsupportedEncodingException | IllegalArgumentException e) {
                     // Ignore
                 }
             } else if ("advsearch".equals(key)) {
@@ -386,28 +384,19 @@ public class ListUrlBuilder implements Cloneable, Parcelable {
         switch (mMode) {
             default:
             case MODE_NORMAL: {
-                boolean filter = false;
                 UrlBuilder ub = new UrlBuilder(EhUrl.getHost());
                 if (mCategory != EhUtils.NONE) {
-                    ub.addQuery("f_doujinshi", ((mCategory & EhConfig.DOUJINSHI) == 0) ? "0" : "1");
-                    ub.addQuery("f_manga", ((mCategory & EhConfig.MANGA) == 0) ? "0" : "1");
-                    ub.addQuery("f_artistcg", ((mCategory & EhConfig.ARTIST_CG) == 0) ? "0" : "1");
-                    ub.addQuery("f_gamecg", ((mCategory & EhConfig.GAME_CG) == 0) ? "0" : "1");
-                    ub.addQuery("f_western", ((mCategory & EhConfig.WESTERN) == 0) ? "0" : "1");
-                    ub.addQuery("f_non-h", ((mCategory & EhConfig.NON_H) == 0) ? "0" : "1");
-                    ub.addQuery("f_imageset", ((mCategory & EhConfig.IMAGE_SET) == 0) ? "0" : "1");
-                    ub.addQuery("f_cosplay", ((mCategory & EhConfig.COSPLAY) == 0) ? "0" : "1");
-                    ub.addQuery("f_asianporn", ((mCategory & EhConfig.ASIAN_PORN) == 0) ? "0" : "1");
-                    ub.addQuery("f_misc", ((mCategory & EhConfig.MISC) == 0) ? "0" : "1");
-                    filter = true;
+                    ub.addQuery("f_cats", (~mCategory) & EhConfig.ALL_CATEGORY);
                 }
                 // Search key
                 if (mKeyword != null) {
-                    try {
-                        ub.addQuery("f_search", URLEncoder.encode(mKeyword, "UTF-8"));
-                        filter = true;
-                    } catch (UnsupportedEncodingException e) {
-                        // Empty
+                    String keyword = mKeyword.trim();
+                    if (!keyword.isEmpty()) {
+                        try {
+                            ub.addQuery("f_search", URLEncoder.encode(mKeyword, "UTF-8"));
+                        } catch (UnsupportedEncodingException e) {
+                            // Empty
+                        }
                     }
                 }
                 // Page index
@@ -430,11 +419,6 @@ public class ListUrlBuilder implements Cloneable, Parcelable {
                         ub.addQuery("f_sr", "on");
                         ub.addQuery("f_srdd", mMinRating);
                     }
-                    filter = true;
-                }
-                // Add filter foot
-                if (filter) {
-                    ub.addQuery("f_apply", "Apply+Filter");
                 }
                 return ub.build();
             }
@@ -464,6 +448,8 @@ public class ListUrlBuilder implements Cloneable, Parcelable {
                 }
                 return sb.toString();
             }
+            case MODE_WHATS_HOT:
+                return EhUrl.getPopularUrl();
             case MODE_IMAGE_SEARCH:
                 return EhUrl.getImageSearchUrl();
         }

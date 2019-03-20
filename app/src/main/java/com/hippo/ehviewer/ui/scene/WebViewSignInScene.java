@@ -20,7 +20,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,18 +27,15 @@ import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-
+import androidx.annotation.Nullable;
 import com.hippo.ehviewer.EhApplication;
 import com.hippo.ehviewer.client.EhCookieStore;
 import com.hippo.ehviewer.client.EhUrl;
 import com.hippo.ehviewer.client.EhUtils;
-
-import junit.framework.Assert;
-
+import com.hippo.yorozuya.AssertUtils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import okhttp3.Cookie;
 import okhttp3.HttpUrl;
 
@@ -63,7 +59,7 @@ public class WebViewSignInScene extends SolidScene {
     public View onCreateView2(LayoutInflater inflater,
             @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         Context context = getContext2();
-        Assert.assertNotNull(context);
+        AssertUtils.assertNotNull(context);
 
         EhUtils.signOut(context);
 
@@ -122,7 +118,7 @@ public class WebViewSignInScene extends SolidScene {
         }
 
         private void addCookie(Context context, String domain, Cookie cookie) {
-            EhApplication.getEhCookieStore(context).add(EhCookieStore.newCookie(cookie, domain, true, true, true));
+            EhApplication.getEhCookieStore(context).addCookie(EhCookieStore.newCookie(cookie, domain, true, true, true));
         }
 
         @Override
@@ -147,6 +143,9 @@ public class WebViewSignInScene extends SolidScene {
                     addCookie(context, EhUrl.DOMAIN_E, cookie);
                 } else if (EhCookieStore.KEY_IPD_PASS_HASH.equals(cookie.name())) {
                     getHash = true;
+                    addCookie(context, EhUrl.DOMAIN_EX, cookie);
+                    addCookie(context, EhUrl.DOMAIN_E, cookie);
+                } else if (EhCookieStore.KEY_IGNEOUS.equals(cookie.name())) {
                     addCookie(context, EhUrl.DOMAIN_EX, cookie);
                     addCookie(context, EhUrl.DOMAIN_E, cookie);
                 }

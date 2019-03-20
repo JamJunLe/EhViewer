@@ -289,6 +289,7 @@ public class EhConfig implements Cloneable {
     public static final int ASIAN_PORN = 0x80;
     public static final int NON_H = 0x100;
     public static final int WESTERN = 0x200;
+    public static final int ALL_CATEGORY = 0x3ff;
 
     public static final int NAMESPACES_RECLASS = 0x1;
     public static final int NAMESPACES_LANGUAGE = 0x2;
@@ -299,6 +300,7 @@ public class EhConfig implements Cloneable {
     public static final int NAMESPACES_MALE = 0x40;
     public static final int NAMESPACES_FEMALE = 0x80;
 
+    public static final String JAPANESE_ORIGINAL = "0";
     public static final String JAPANESE_TRANSLATED = "1024";
     public static final String JAPANESE_REWRITE = "2048";
     public static final String ENGLISH_ORIGINAL = "1";

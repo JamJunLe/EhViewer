@@ -21,10 +21,6 @@ import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.NinePatchDrawable;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -32,20 +28,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import com.h6ah4i.android.widget.advrecyclerview.animator.GeneralItemAnimator;
 import com.h6ah4i.android.widget.advrecyclerview.animator.SwipeDismissItemAnimator;
 import com.h6ah4i.android.widget.advrecyclerview.draggable.DraggableItemAdapter;
 import com.h6ah4i.android.widget.advrecyclerview.draggable.ItemDraggableRange;
 import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager;
-import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeManager;
-import com.h6ah4i.android.widget.advrecyclerview.swipeable.SwipeableItemAdapter;
-import com.h6ah4i.android.widget.advrecyclerview.swipeable.SwipeableItemConstants;
-import com.h6ah4i.android.widget.advrecyclerview.swipeable.action.SwipeResultAction;
-import com.h6ah4i.android.widget.advrecyclerview.swipeable.action.SwipeResultActionDefault;
-import com.h6ah4i.android.widget.advrecyclerview.swipeable.action.SwipeResultActionMoveToSwipedDirection;
 import com.h6ah4i.android.widget.advrecyclerview.touchguard.RecyclerViewTouchActionGuardManager;
-import com.h6ah4i.android.widget.advrecyclerview.utils.AbstractDraggableSwipeableItemViewHolder;
+import com.h6ah4i.android.widget.advrecyclerview.utils.AbstractDraggableItemViewHolder;
 import com.hippo.app.EditTextDialogBuilder;
 import com.hippo.easyrecyclerview.EasyRecyclerView;
 import com.hippo.ehviewer.EhApplication;
@@ -53,10 +46,8 @@ import com.hippo.ehviewer.R;
 import com.hippo.ehviewer.dao.DownloadLabel;
 import com.hippo.util.DrawableManager;
 import com.hippo.view.ViewTransition;
+import com.hippo.yorozuya.AssertUtils;
 import com.hippo.yorozuya.ViewUtils;
-
-import junit.framework.Assert;
-
 import java.util.List;
 
 public class DownloadLabelsScene extends ToolbarScene {
@@ -101,8 +92,8 @@ public class DownloadLabelsScene extends ToolbarScene {
         mViewTransition = new ViewTransition(mRecyclerView, tip);
 
         Context context = getContext2();
-        Assert.assertNotNull(context);
-        Drawable drawable = DrawableManager.getDrawable(context, R.drawable.big_label);
+        AssertUtils.assertNotNull(context);
+        Drawable drawable = DrawableManager.getVectorDrawable(context, R.drawable.big_label);
         drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
         tip.setCompoundDrawables(null, drawable, null, null);
         tip.setText(R.string.no_download_label);
@@ -115,12 +106,9 @@ public class DownloadLabelsScene extends ToolbarScene {
         RecyclerViewDragDropManager dragDropManager = new RecyclerViewDragDropManager();
         dragDropManager.setDraggingItemShadowDrawable(
                 (NinePatchDrawable) context.getResources().getDrawable(R.drawable.shadow_8dp));
-        // swipe manager
-        RecyclerViewSwipeManager swipeManager = new RecyclerViewSwipeManager();
         RecyclerView.Adapter adapter = new LabelAdapter();
         adapter.setHasStableIds(true);
         adapter = dragDropManager.createWrappedAdapter(adapter); // wrap for dragging
-        adapter = swipeManager.createWrappedAdapter(adapter); // wrap for swiping
         mAdapter = adapter;
         final GeneralItemAnimator animator = new SwipeDismissItemAnimator();
         animator.setSupportsChangeAnimations(false);
@@ -129,7 +117,6 @@ public class DownloadLabelsScene extends ToolbarScene {
         mRecyclerView.setAdapter(adapter);
         mRecyclerView.setItemAnimator(animator);
         guardManager.attachRecyclerView(mRecyclerView);
-        swipeManager.attachRecyclerView(mRecyclerView);
         dragDropManager.attachRecyclerView(mRecyclerView);
 
         updateView();
@@ -287,66 +274,77 @@ public class DownloadLabelsScene extends ToolbarScene {
         }
     }
 
-    private class LabelHolder extends AbstractDraggableSwipeableItemViewHolder
+    private class LabelHolder extends AbstractDraggableItemViewHolder
             implements View.OnClickListener {
 
-        public final View swipeHandler;
         public final TextView label;
         public final View dragHandler;
+        public final View delete;
 
         public LabelHolder(View itemView) {
             super(itemView);
 
-            swipeHandler = ViewUtils.$$(itemView, R.id.swipe_handler);
             label = (TextView) ViewUtils.$$(itemView, R.id.label);
             dragHandler = ViewUtils.$$(itemView, R.id.drag_handler);
+            delete = ViewUtils.$$(itemView, R.id.delete);
 
             label.setOnClickListener(this);
+            delete.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View v) {
+            int position = getAdapterPosition();
             Context context = getContext2();
             if (null == context || null == mList || null == mRecyclerView) {
                 return;
             }
 
-            int index = mRecyclerView.getChildAdapterPosition(itemView);
-            if (index < 0 || index >= mList.size()) {
-                return;
-            }
-
             if (label == v) {
-                DownloadLabel raw = mList.get(index);
+                DownloadLabel raw = mList.get(position);
                 EditTextDialogBuilder builder = new EditTextDialogBuilder(
                         context, raw.getLabel(), getString(R.string.download_labels));
                 builder.setTitle(R.string.rename_label_title);
                 builder.setPositiveButton(android.R.string.ok, null);
                 AlertDialog dialog = builder.show();
-                new RenameLabelDialogHelper(builder, dialog, raw.getLabel(), index);
+                new RenameLabelDialogHelper(builder, dialog, raw.getLabel(), position);
+            } else if (delete == v) {
+                final DownloadLabel label = mList.get(position);
+                new AlertDialog.Builder(context)
+                    .setTitle(R.string.delete_label_title)
+                    .setMessage(getString(R.string.delete_label_message, label.getLabel()))
+                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            EhApplication.getDownloadManager(context).deleteLabel(label.getLabel());
+                        }
+                    })
+                    .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                        @Override
+                        public void onDismiss(DialogInterface dialog) {
+                            if (null != mAdapter) {
+                                mAdapter.notifyDataSetChanged();
+                            }
+                            updateView();
+                        }
+                    }).show();
             }
-        }
-
-        @Override
-        public View getSwipeableContainerView() {
-            return swipeHandler;
         }
     }
 
     private class LabelAdapter extends RecyclerView.Adapter<LabelHolder>
-            implements DraggableItemAdapter<LabelHolder>,
-            SwipeableItemAdapter<LabelHolder> {
+            implements DraggableItemAdapter<LabelHolder> {
 
         private final LayoutInflater mInflater;
 
         public LabelAdapter() {
             mInflater = getLayoutInflater2();
-            Assert.assertNotNull(mInflater);
+            AssertUtils.assertNotNull(mInflater);
         }
 
         @Override
         public LabelHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            return new LabelHolder(mInflater.inflate(R.layout.item_label_list, parent, false));
+            return new LabelHolder(mInflater.inflate(R.layout.item_download_label, parent, false));
         }
 
         @Override
@@ -354,7 +352,6 @@ public class DownloadLabelsScene extends ToolbarScene {
             if (mList != null) {
                 holder.label.setText(mList.get(position).getLabel());
             }
-            holder.setSwipeItemHorizontalSlideAmount(0);
         }
 
         @Override
@@ -396,69 +393,9 @@ public class DownloadLabelsScene extends ToolbarScene {
         }
 
         @Override
-        public int onGetSwipeReactionType(LabelHolder holder, int position, int x, int y) {
-            if (ViewUtils.isViewUnder(holder.getSwipeableContainerView(), x, y, 0)) {
-                return SwipeableItemConstants.REACTION_CAN_SWIPE_LEFT;
-            } else {
-                return SwipeableItemConstants.REACTION_CAN_NOT_SWIPE_BOTH_H;
-            }
-        }
+        public void onItemDragStarted(int position) { }
 
         @Override
-        public void onSetSwipeBackground(LabelHolder holder, int position, int type) {}
-
-        @Override
-        public SwipeResultAction onSwipeItem(LabelHolder holder, int position, int result) {
-            switch (result) {
-                // swipe left --- pin
-                case SwipeableItemConstants.RESULT_SWIPED_LEFT:
-                    return new SwipeLeftResultAction(position);
-                // other --- do nothing
-                case SwipeableItemConstants.RESULT_SWIPED_RIGHT:
-                case SwipeableItemConstants.RESULT_CANCELED:
-                default:
-                    return new SwipeResultActionDefault();
-            }
-        }
-    }
-
-    private class SwipeLeftResultAction extends SwipeResultActionMoveToSwipedDirection {
-
-        private final int mPosition;
-
-        public SwipeLeftResultAction(int position) {
-            mPosition = position;
-        }
-
-        @Override
-        protected void onPerformAction() {
-            super.onPerformAction();
-
-            final Context context = getContext2();
-            final List<DownloadLabel> list = mList;
-            if (null == context || null == list || mPosition < 0 || mPosition >= list.size()) {
-                return;
-            }
-            final DownloadLabel label = list.get(mPosition);
-
-            new AlertDialog.Builder(context)
-                    .setTitle(R.string.delete_label_title)
-                    .setMessage(getString(R.string.delete_label_message, label.getLabel()))
-                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            EhApplication.getDownloadManager(context).deleteLabel(label.getLabel());
-                        }
-                    })
-                    .setOnDismissListener(new DialogInterface.OnDismissListener() {
-                        @Override
-                        public void onDismiss(DialogInterface dialog) {
-                            if (null != mAdapter) {
-                                mAdapter.notifyDataSetChanged();
-                            }
-                            updateView();
-                        }
-                    }).show();
-        }
+        public void onItemDragFinished(int fromPosition, int toPosition, boolean result) { }
     }
 }

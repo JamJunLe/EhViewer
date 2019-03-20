@@ -38,7 +38,8 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/gallery_search_bar_margin_h"
         android:layout_marginRight="@dimen/gallery_search_bar_margin_h"
-        android:layout_marginTop="@dimen/gallery_search_bar_margin_v"/>
+        android:layout_marginTop="@dimen/gallery_search_bar_margin_v"
+        style="@style/CardView.Normal"/>
 
     <com.hippo.widget.FabLayout
         xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -48,24 +49,24 @@
         android:paddingRight="@dimen/corner_fab_margin"
         android:paddingBottom="@dimen/corner_fab_margin">
 
-        <android.support.design.widget.FloatingActionButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:srcCompat="@drawable/v_go_to_dark_x24"
-            app:backgroundTint="?attr/colorAccent"
+            app:backgroundTint="?attr/widgetColorThemeAccent"
             style="@style/Widget.Design.FloatingActionButton.Mini"/>
 
-        <android.support.design.widget.FloatingActionButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:srcCompat="@drawable/v_refresh_dark_x24"
-            app:backgroundTint="?attr/colorAccent"
+            app:backgroundTint="?attr/widgetColorThemeAccent"
             style="@style/Widget.Design.FloatingActionButton.Mini"/>
 
-        <android.support.design.widget.FloatingActionButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:backgroundTint="?attr/colorPrimary"
+            app:backgroundTint="?attr/widgetColorThemePrimary"
             style="@style/Widget.Design.FloatingActionButton"/>
 
     </com.hippo.widget.FabLayout>
@@ -77,11 +78,12 @@
         android:paddingRight="@dimen/corner_fab_margin"
         android:paddingBottom="@dimen/corner_fab_margin">
 
-        <android.support.design.widget.FloatingActionButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/search_fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:srcCompat="@drawable/v_magnify_dark_x24"
+            app:backgroundTint="?attr/widgetColorThemeAccent"
             android:visibility="invisible"
             android:scaleX="0"
             android:scaleY="0"

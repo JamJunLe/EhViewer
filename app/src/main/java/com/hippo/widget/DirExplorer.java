@@ -17,20 +17,21 @@
 package com.hippo.widget;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Environment;
-import android.support.v7.widget.LinearLayoutManager;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
+import androidx.recyclerview.widget.LinearLayoutManager;
+import com.hippo.android.resource.AttrResources;
 import com.hippo.easyrecyclerview.EasyRecyclerView;
 import com.hippo.easyrecyclerview.LinearDividerItemDecoration;
 import com.hippo.ehviewer.R;
 import com.hippo.ripple.Ripple;
 import com.hippo.yorozuya.LayoutUtils;
-
 import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
@@ -73,11 +74,11 @@ public class DirExplorer extends EasyRecyclerView implements EasyRecyclerView.On
         setAdapter(mAdapter);
         setLayoutManager(new LinearLayoutManager(context));
         LinearDividerItemDecoration decoration = new LinearDividerItemDecoration(
-                LinearDividerItemDecoration.VERTICAL, getResources().getColor(R.color.divider),
+                LinearDividerItemDecoration.VERTICAL, AttrResources.getAttrColor(context, R.attr.dividerColor),
                 LayoutUtils.dp2pix(context, 1));
         decoration.setShowLastDivider(true);
         addItemDecoration(decoration);
-        setSelector(Ripple.generateRippleDrawable(context, false));
+        setSelector(Ripple.generateRippleDrawable(context, !AttrResources.getAttrBoolean(context, R.attr.isLightTheme), new ColorDrawable(Color.TRANSPARENT)));
         setOnItemClickListener(this);
 
         mCurrentFile = Environment.getExternalStorageDirectory();

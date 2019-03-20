@@ -17,9 +17,10 @@
 package com.hippo.widget;
 
 import android.content.Context;
-import android.support.design.widget.CoordinatorLayout;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import com.hippo.util.ExceptionUtils;
 
 public class SafeCoordinatorLayout extends CoordinatorLayout {
 
@@ -39,7 +40,8 @@ public class SafeCoordinatorLayout extends CoordinatorLayout {
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         try {
             return super.onInterceptTouchEvent(ev);
-        } catch (Exception e) {
+        } catch (Throwable e) {
+            ExceptionUtils.throwIfFatal(e);
             return false;
         }
     }
@@ -48,7 +50,8 @@ public class SafeCoordinatorLayout extends CoordinatorLayout {
     public boolean onTouchEvent(MotionEvent ev) {
         try {
             return super.onTouchEvent(ev);
-        } catch (Exception e) {
+        } catch (Throwable e) {
+            ExceptionUtils.throwIfFatal(e);
             return false;
         }
     }

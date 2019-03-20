@@ -22,8 +22,6 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.ColorInt;
-import android.support.annotation.NonNull;
 import android.text.Editable;
 import android.text.Layout;
 import android.text.Spannable;
@@ -46,9 +44,12 @@ import android.text.style.TextAppearanceSpan;
 import android.text.style.TypefaceSpan;
 import android.text.style.URLSpan;
 import android.text.style.UnderlineSpan;
-
-import com.hippo.ehviewer.R;
-
+import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.HashMap;
+import java.util.Locale;
 import org.ccil.cowan.tagsoup.HTMLSchema;
 import org.ccil.cowan.tagsoup.Parser;
 import org.xml.sax.Attributes;
@@ -57,11 +58,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
-
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.HashMap;
-import java.util.Locale;
 
 /**
  * This class processes HTML strings into displayable styled text.
@@ -678,7 +674,7 @@ class HtmlToSpannedConverter implements ContentHandler {
         }
 
         if (d == null) {
-            d = Html.sResources.getDrawable(R.drawable.image_failed);
+            d = Resources.getSystem().getDrawable(android.R.drawable.ic_menu_report_image);
             d.setBounds(0, 0, d.getIntrinsicWidth(), d.getIntrinsicHeight());
         }
 
@@ -717,11 +713,13 @@ class HtmlToSpannedConverter implements ContentHandler {
                             where, len,
                             Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 } else {
-                    int c = getHtmlColor(f.mColor);
-                    if (c != -1) {
+                    try {
+                        int c = getHtmlColor(f.mColor);
                         text.setSpan(new ForegroundColorSpan(c | 0xFF000000),
                                 where, len,
                                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    } catch (IllegalArgumentException e) {
+                        // Ignore
                     }
                 }
             }
@@ -910,16 +908,19 @@ class HtmlToSpannedConverter implements ContentHandler {
      */
     @ColorInt
     public static int getHtmlColor(@NonNull String colorString) {
-        if (colorString.charAt(0) == '#') {
+        if ((colorString.length() == 7 || colorString.length() == 9) && colorString.charAt(0) == '#') {
             // Use a long to avoid rollovers on #ffXXXXXX
-            long color = Long.parseLong(colorString.substring(1), 16);
+            long color;
+            try {
+                color = Long.parseLong(colorString.substring(1), 16);
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("Unknown color: " + colorString);
+            }
             if (colorString.length() == 7) {
                 // Set the alpha value
                 color |= 0x00000000ff000000;
-            } else if (colorString.length() != 9) {
-                throw new IllegalArgumentException("Unknown color: " + colorString);
             }
-            return (int)color;
+            return (int) color;
         } else if (colorString.startsWith("rgb(") && colorString.endsWith(")")) {
             String str = colorString.substring(4, colorString.length() - 1);
             String[] colors = str.split("[\\s]*,[\\s]*");

@@ -16,10 +16,10 @@
 
 package com.hippo.ehviewer.ui.scene;
 
-import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
-
+import androidx.recyclerview.widget.RecyclerView;
 import com.hippo.ehviewer.R;
 import com.hippo.ehviewer.widget.SimpleRatingView;
 import com.hippo.widget.LoadImageView;
@@ -32,17 +32,23 @@ class GalleryHolder extends RecyclerView.ViewHolder {
     public final SimpleRatingView rating;
     public final TextView category;
     public final TextView posted;
+    public final TextView pages;
     public final TextView simpleLanguage;
+    public final ImageView favourited;
+    public final ImageView downloaded;
 
     public GalleryHolder(View itemView) {
         super(itemView);
 
-        thumb = (LoadImageView) itemView.findViewById(R.id.thumb);
-        title = (TextView) itemView.findViewById(R.id.title);
-        uploader = (TextView) itemView.findViewById(R.id.uploader);
-        rating = (SimpleRatingView) itemView.findViewById(R.id.rating);
-        category = (TextView) itemView.findViewById(R.id.category);
-        posted = (TextView) itemView.findViewById(R.id.posted);
-        simpleLanguage = (TextView) itemView.findViewById(R.id.simple_language);
+        thumb = itemView.findViewById(R.id.thumb);
+        title = itemView.findViewById(R.id.title);
+        uploader = itemView.findViewById(R.id.uploader);
+        rating = itemView.findViewById(R.id.rating);
+        category = itemView.findViewById(R.id.category);
+        posted = itemView.findViewById(R.id.posted);
+        pages = itemView.findViewById(R.id.pages);
+        simpleLanguage = itemView.findViewById(R.id.simple_language);
+        favourited = itemView.findViewById(R.id.favourited);
+        downloaded = itemView.findViewById(R.id.downloaded);
     }
 }

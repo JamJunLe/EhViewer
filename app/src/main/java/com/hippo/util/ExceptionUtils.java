@@ -16,28 +16,26 @@
 
 package com.hippo.util;
 
-
-import android.support.annotation.NonNull;
-
+import androidx.annotation.NonNull;
 import com.hippo.ehviewer.GetText;
 import com.hippo.ehviewer.R;
 import com.hippo.ehviewer.client.exception.EhException;
 import com.hippo.network.StatusCodeException;
-
-import org.apache.http.conn.ConnectTimeoutException;
-
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import javax.net.ssl.SSLException;
+import org.apache.http.conn.ConnectTimeoutException;
 
 public final class ExceptionUtils {
 
     private static final String TAG = ExceptionUtils.class.getSimpleName();
 
     @NonNull
-    public static String getReadableString(@NonNull Exception e) {
+    public static String getReadableString(@NonNull Throwable e) {
+        e.printStackTrace();
         if (e instanceof MalformedURLException) {
             return GetText.getString(R.string.error_invalid_url);
         } else if (e instanceof ConnectTimeoutException ||
@@ -55,12 +53,23 @@ public final class ExceptionUtils {
             return sb.toString();
         } else if (e instanceof ProtocolException && e.getMessage().startsWith("Too many follow-up requests:")) {
             return GetText.getString(R.string.error_redirection);
-        } else if (e instanceof ProtocolException || e instanceof SocketException) {
+        } else if (e instanceof ProtocolException || e instanceof SocketException || e instanceof SSLException) {
             return GetText.getString(R.string.error_socket);
         } else if (e instanceof EhException) {
             return e.getMessage();
         } else {
             return GetText.getString(R.string.error_unknown);
+        }
+    }
+
+    public static void throwIfFatal(@NonNull Throwable t) {
+        // values here derived from https://github.com/ReactiveX/RxJava/issues/748#issuecomment-32471495
+        if (t instanceof VirtualMachineError) {
+            throw (VirtualMachineError) t;
+        } else if (t instanceof ThreadDeath) {
+            throw (ThreadDeath) t;
+        } else if (t instanceof LinkageError) {
+            throw (LinkageError) t;
         }
     }
 }

@@ -22,12 +22,6 @@ import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.support.annotation.IntDef;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SwitchCompat;
 import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -37,7 +31,13 @@ import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
-
+import androidx.annotation.IntDef;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.SwitchCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import com.hippo.android.resource.AttrResources;
 import com.hippo.easyrecyclerview.EasyRecyclerView;
 import com.hippo.easyrecyclerview.MarginItemDecoration;
 import com.hippo.ehviewer.R;
@@ -46,7 +46,6 @@ import com.hippo.ehviewer.client.exception.EhException;
 import com.hippo.ripple.Ripple;
 import com.hippo.widget.RadioGridGroup;
 import com.hippo.yorozuya.ViewUtils;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -139,7 +138,7 @@ public class SearchLayout extends EasyRecyclerView implements CompoundButton.OnC
         mNormalSearchModeHelp = (ImageView) normalView.findViewById(R.id.normal_search_mode_help);
         mEnableAdvanceSwitch = (SwitchCompat) normalView.findViewById(R.id.search_enable_advance);
         mNormalSearchModeHelp.setOnClickListener(this);
-        Ripple.addRipple(mNormalSearchModeHelp, false);
+        Ripple.addRipple(mNormalSearchModeHelp, !AttrResources.getAttrBoolean(context, R.attr.isLightTheme));
         mEnableAdvanceSwitch.setOnCheckedChangeListener(SearchLayout.this);
         mEnableAdvanceSwitch.setSwitchPadding(resources.getDimensionPixelSize(R.dimen.switch_padding));
 
@@ -231,10 +230,6 @@ public class SearchLayout extends EasyRecyclerView implements CompoundButton.OnC
                 }
             }
         }
-    }
-
-    public boolean isSpecifyGallery() {
-        return R.id.search_specify_gallery == mNormalSearchMode.getCheckedRadioButtonId();
     }
 
     public void formatListUrlBuilder(ListUrlBuilder urlBuilder, String query) throws EhException {

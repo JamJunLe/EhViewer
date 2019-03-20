@@ -30,12 +30,11 @@ import android.provider.Settings;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.view.ViewDebug.ExportedProperty;
-import android.widget.TextView;
-
+import androidx.appcompat.widget.AppCompatTextView;
 import java.util.Calendar;
 import java.util.TimeZone;
 
-public class TextClock extends TextView {
+public class TextClock extends AppCompatTextView {
 
     public static final CharSequence DEFAULT_FORMAT_12_HOUR = "hh:mm a";
     public static final CharSequence DEFAULT_FORMAT_24_HOUR;

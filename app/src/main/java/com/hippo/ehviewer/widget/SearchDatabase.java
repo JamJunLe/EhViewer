@@ -19,6 +19,7 @@ package com.hippo.ehviewer.widget;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.text.TextUtils;
@@ -57,10 +58,10 @@ public final class SearchDatabase {
         mDatabase = databaseHelper.getWritableDatabase();
     }
 
-    public String[] getSuggestions(String prefix) {
+    public String[] getSuggestions(String prefix, int limit) {
         List<String> queryList = new LinkedList<>();
+        limit = Math.max(0, limit);
 
-        // TODO add limit
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT * FROM ").append(TABLE_SUGGESTIONS);
         if (!TextUtils.isEmpty(prefix)) {
@@ -68,20 +69,25 @@ public final class SearchDatabase {
                     .append(SqlUtils.sqlEscapeString(prefix)).append("%'");
         }
         sb.append(" ORDER BY ").append(COLUMN_DATE).append(" DESC")
-                .append(" LIMIT 5");
-        Cursor cursor = mDatabase.rawQuery(sb.toString(), null);
-        int queryIndex = cursor.getColumnIndex(COLUMN_QUERY);
-        if (cursor.moveToFirst()) {
-            while (!cursor.isAfterLast()) {
-                String suggestion = cursor.getString(queryIndex);
-                if (!prefix.equals(suggestion)) {
-                    queryList.add(suggestion);
+            .append(" LIMIT ").append(limit);
+
+        try {
+            Cursor cursor = mDatabase.rawQuery(sb.toString(), null);
+            int queryIndex = cursor.getColumnIndex(COLUMN_QUERY);
+            if (cursor.moveToFirst()) {
+                while (!cursor.isAfterLast()) {
+                    String suggestion = cursor.getString(queryIndex);
+                    if (!prefix.equals(suggestion)) {
+                        queryList.add(suggestion);
+                    }
+                    cursor.moveToNext();
                 }
-                cursor.moveToNext();
             }
+            cursor.close();
+            return queryList.toArray(new String[queryList.size()]);
+        } catch (SQLException e) {
+            return new String[0];
         }
-        cursor.close();
-        return queryList.toArray(new String[queryList.size()]);
     }
 
     public void addQuery(final String query) {

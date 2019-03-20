@@ -1,3 +1,5 @@
+[![Telegram](https://img.shields.io/badge/chat-Telegram-blue.svg)](https://t.me/ehviewer)
+
 # EhViewer
 
 ![Icon](art/launcher_icon-web.png)
@@ -55,7 +57,7 @@ Here is the libraries
 
 # License
 
-    Copyright (C) 2014-2016 Hippo Seven
+    Copyright (C) 2014-2019 Hippo Seven
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.

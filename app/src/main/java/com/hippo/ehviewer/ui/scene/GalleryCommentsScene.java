@@ -24,17 +24,13 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Looper;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
@@ -51,9 +47,17 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.hippo.android.resource.AttrResources;
 import com.hippo.easyrecyclerview.EasyRecyclerView;
 import com.hippo.easyrecyclerview.LinearDividerItemDecoration;
+import com.hippo.ehviewer.Analytics;
 import com.hippo.ehviewer.EhApplication;
 import com.hippo.ehviewer.R;
 import com.hippo.ehviewer.UrlOpener;
@@ -69,6 +73,7 @@ import com.hippo.scene.SceneFragment;
 import com.hippo.text.Html;
 import com.hippo.text.URLImageGetter;
 import com.hippo.util.DrawableManager;
+import com.hippo.util.ExceptionUtils;
 import com.hippo.util.ReadableTime;
 import com.hippo.util.TextUrl;
 import com.hippo.view.ViewTransition;
@@ -76,15 +81,13 @@ import com.hippo.widget.FabLayout;
 import com.hippo.widget.LinkifyTextView;
 import com.hippo.widget.ObservedTextView;
 import com.hippo.yorozuya.AnimationUtils;
+import com.hippo.yorozuya.AssertUtils;
 import com.hippo.yorozuya.LayoutUtils;
 import com.hippo.yorozuya.ResourcesUtils;
 import com.hippo.yorozuya.SimpleAnimatorListener;
 import com.hippo.yorozuya.StringUtils;
 import com.hippo.yorozuya.ViewUtils;
 import com.hippo.yorozuya.collect.IntList;
-
-import junit.framework.Assert;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -191,24 +194,24 @@ public final class GalleryCommentsScene extends ToolbarScene
         mFab = (FloatingActionButton) ViewUtils.$$(view, R.id.fab);
 
         Context context = getContext2();
-        Assert.assertNotNull(context);
+        AssertUtils.assertNotNull(context);
         Resources resources = context.getResources();
         int paddingBottomFab = resources.getDimensionPixelOffset(R.dimen.gallery_padding_bottom_fab);
 
-        Drawable drawable = DrawableManager.getDrawable(context, R.drawable.big_weird_face);
+        Drawable drawable = DrawableManager.getVectorDrawable(context, R.drawable.big_sad_pandroid);
         drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
         tip.setCompoundDrawables(null, drawable, null, null);
 
         mAdapter = new CommentAdapter();
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(context,
-                LinearLayoutManager.VERTICAL, false));
+                RecyclerView.VERTICAL, false));
         LinearDividerItemDecoration decoration = new LinearDividerItemDecoration(
-                LinearDividerItemDecoration.VERTICAL, context.getResources().getColor(R.color.divider),
+                LinearDividerItemDecoration.VERTICAL, AttrResources.getAttrColor(context, R.attr.dividerColor),
                 LayoutUtils.dp2pix(context, 1));
         decoration.setShowLastDivider(true);
         mRecyclerView.addItemDecoration(decoration);
-        mRecyclerView.setSelector(Ripple.generateRippleDrawable(context, false));
+        mRecyclerView.setSelector(Ripple.generateRippleDrawable(context, !AttrResources.getAttrBoolean(context, R.attr.isLightTheme), new ColorDrawable(Color.TRANSPARENT)));
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setOnItemClickListener(this);
         mRecyclerView.setPadding(mRecyclerView.getPaddingLeft(), mRecyclerView.getPaddingTop(),
@@ -281,6 +284,8 @@ public final class GalleryCommentsScene extends ToolbarScene
                 .setCallback(new VoteCommentListener(context,
                         activity.getStageId(), getTag()));
         EhApplication.getEhClient(context).execute(request);
+
+        Analytics.voteComment(mGid, mToken);
     }
 
     private class InfoHolder extends RecyclerView.ViewHolder {
@@ -321,7 +326,7 @@ public final class GalleryCommentsScene extends ToolbarScene
         rv.setAdapter(new RecyclerView.Adapter<InfoHolder>() {
             @Override
             public InfoHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-                return new InfoHolder(inflater.inflate(R.layout.item_favorite_info_data, parent, false));
+                return new InfoHolder(inflater.inflate(R.layout.item_drawer_favorites, parent, false));
             }
 
             @Override
@@ -337,11 +342,11 @@ public final class GalleryCommentsScene extends ToolbarScene
         });
         rv.setLayoutManager(new LinearLayoutManager(context));
         LinearDividerItemDecoration decoration = new LinearDividerItemDecoration(
-                LinearDividerItemDecoration.VERTICAL, context.getResources().getColor(R.color.divider),
+                LinearDividerItemDecoration.VERTICAL, AttrResources.getAttrColor(context, R.attr.dividerColor),
                 LayoutUtils.dp2pix(context, 1));
         decoration.setPadding(ResourcesUtils.getAttrDimensionPixelOffset(context, R.attr.dialogPreferredPadding));
         rv.addItemDecoration(decoration);
-        rv.setSelector(Ripple.generateRippleDrawable(context, false));
+        rv.setSelector(Ripple.generateRippleDrawable(context, !AttrResources.getAttrBoolean(context, R.attr.isLightTheme), new ColorDrawable(Color.TRANSPARENT)));
         rv.setClipToPadding(false);
         builder.setView(rv).show();
     }
@@ -459,7 +464,7 @@ public final class GalleryCommentsScene extends ToolbarScene
                     return;
                 }
 
-                mFab.setVisibility(View.INVISIBLE);
+                ((View) mFab).setVisibility(View.INVISIBLE);
                 mEditPanel.setVisibility(View.VISIBLE);
                 int halfW = mEditPanel.getWidth() / 2;
                 int halfH = mEditPanel.getHeight() / 2;
@@ -484,7 +489,7 @@ public final class GalleryCommentsScene extends ToolbarScene
                 return;
             }
 
-            mFab.setVisibility(View.INVISIBLE);
+            ((View) mFab).setVisibility(View.INVISIBLE);
             mEditPanel.setVisibility(View.VISIBLE);
         }
     }
@@ -506,8 +511,15 @@ public final class GalleryCommentsScene extends ToolbarScene
                     return;
                 }
 
+                if (Looper.myLooper() != Looper.getMainLooper()) {
+                    // Some devices may run this block in non-UI thread.
+                    // It might be a bug of Android OS.
+                    // Check it here to avoid crash.
+                    return;
+                }
+
                 mEditPanel.setVisibility(View.GONE);
-                mFab.setVisibility(View.VISIBLE);
+                ((View) mFab).setVisibility(View.VISIBLE);
                 int fabStartX = mEditPanel.getLeft() + (mEditPanel.getWidth() / 2) - (mFab.getWidth() / 2);
                 int fabStartY = mEditPanel.getTop() + (mEditPanel.getHeight() / 2) - (mFab.getHeight() / 2);
                 mFab.setX(fabStartX);
@@ -536,7 +548,7 @@ public final class GalleryCommentsScene extends ToolbarScene
                 return;
             }
 
-            mFab.setVisibility(View.VISIBLE);
+            ((View) mFab).setVisibility(View.VISIBLE);
             mEditPanel.setVisibility(View.INVISIBLE);
         }
     }
@@ -582,6 +594,8 @@ public final class GalleryCommentsScene extends ToolbarScene
                 EhApplication.getEhClient(context).execute(request);
                 hideSoftInput();
                 hideEditPanel(true);
+
+                Analytics.commentGallery(mGid, mToken);
             }
         }
     }
@@ -618,7 +632,7 @@ public final class GalleryCommentsScene extends ToolbarScene
 
         public CommentAdapter() {
             mInflater = getLayoutInflater2();
-            Assert.assertNotNull(mInflater);
+            AssertUtils.assertNotNull(mInflater);
         }
 
         @Override
@@ -636,7 +650,7 @@ public final class GalleryCommentsScene extends ToolbarScene
                 SpannableString ss = new SpannableString(scoreString);
                 ss.setSpan(new RelativeSizeSpan(0.8f), 0, scoreString.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 ss.setSpan(new StyleSpan(Typeface.BOLD), 0, scoreString.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                ss.setSpan(new ForegroundColorSpan(context.getResources().getColor(R.color.secondary_text_default_light))
+                ss.setSpan(new ForegroundColorSpan(AttrResources.getAttrColor(context, android.R.attr.textColorSecondary))
                         , 0, scoreString.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 ssb.append("  ").append(ss);
             }
@@ -737,7 +751,7 @@ public final class GalleryCommentsScene extends ToolbarScene
 
         @Override
         public void onFailure(Exception e) {
-            showTip(R.string.comment_failed, LENGTH_SHORT);
+            showTip(getContent().getString(R.string.comment_failed) + "\n" + ExceptionUtils.getReadableString(e), LENGTH_LONG);
         }
 
         @Override
@@ -771,7 +785,7 @@ public final class GalleryCommentsScene extends ToolbarScene
 
         @Override
         public void onFailure(Exception e) {
-            showTip(R.string.vote_failed, LENGTH_SHORT);
+            showTip(R.string.vote_failed, LENGTH_LONG);
         }
 
         @Override

@@ -20,28 +20,29 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import com.hippo.android.resource.AttrResources;
 import com.hippo.easyrecyclerview.EasyRecyclerView;
 import com.hippo.easyrecyclerview.LinearDividerItemDecoration;
 import com.hippo.ehviewer.R;
+import com.hippo.ehviewer.Settings;
 import com.hippo.ehviewer.client.EhUrl;
 import com.hippo.ehviewer.client.EhUtils;
 import com.hippo.ehviewer.client.data.GalleryDetail;
 import com.hippo.ripple.Ripple;
+import com.hippo.yorozuya.AssertUtils;
 import com.hippo.yorozuya.LayoutUtils;
 import com.hippo.yorozuya.ViewUtils;
-
-import junit.framework.Assert;
-
 import java.util.ArrayList;
 
 public final class GalleryInfoScene extends ToolbarScene implements EasyRecyclerView.OnItemClickListener {
@@ -85,7 +86,7 @@ public final class GalleryInfoScene extends ToolbarScene implements EasyRecycler
         }
 
         Resources resources = getResources2();
-        Assert.assertNotNull(resources);
+        AssertUtils.assertNotNull(resources);
         mKeys.add(resources.getString(R.string.header_key));
         mValues.add(resources.getString(R.string.header_value));
         mKeys.add(resources.getString(R.string.key_gid));
@@ -128,6 +129,8 @@ public final class GalleryInfoScene extends ToolbarScene implements EasyRecycler
         mValues.add(Integer.toString(gd.torrentCount));
         mKeys.add(resources.getString(R.string.key_torrent_url));
         mValues.add(gd.torrentUrl);
+        mKeys.add(resources.getString(R.string.favorite_name));
+        mValues.add(gd.favoriteName);
     }
 
     protected void onInit() {
@@ -156,18 +159,19 @@ public final class GalleryInfoScene extends ToolbarScene implements EasyRecycler
         View view = inflater.inflate(R.layout.scene_gallery_info, container, false);
 
         Context context = getContext2();
-        Assert.assertNotNull(context);
+        AssertUtils.assertNotNull(context);
 
         mRecyclerView = (EasyRecyclerView) ViewUtils.$$(view, R.id.recycler_view);
         InfoAdapter adapter = new InfoAdapter();
         mRecyclerView.setAdapter(adapter);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(context, RecyclerView.VERTICAL, false));
         LinearDividerItemDecoration decoration = new LinearDividerItemDecoration(
-                LinearDividerItemDecoration.VERTICAL, context.getResources().getColor(R.color.divider),
+                LinearDividerItemDecoration.VERTICAL,
+                AttrResources.getAttrColor(context, R.attr.dividerColor),
                 LayoutUtils.dp2pix(context, 1));
         decoration.setPadding(context.getResources().getDimensionPixelOffset(R.dimen.keyline_margin));
         mRecyclerView.addItemDecoration(decoration);
-        mRecyclerView.setSelector(Ripple.generateRippleDrawable(context, false));
+        mRecyclerView.setSelector(Ripple.generateRippleDrawable(context, !AttrResources.getAttrBoolean(context, R.attr.isLightTheme), new ColorDrawable(Color.TRANSPARENT)));
         mRecyclerView.setClipToPadding(false);
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setOnItemClickListener(this);
@@ -197,6 +201,12 @@ public final class GalleryInfoScene extends ToolbarScene implements EasyRecycler
         if (null != context && 0 != position && null != mValues) {
             ClipboardManager cmb = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
             cmb.setPrimaryClip(ClipData.newPlainText(null, mValues.get(position)));
+
+            if (position == 3) {
+                // Save it to avoid detect the gallery
+                Settings.putClipboardTextHashCode(mValues.get(position).hashCode());
+            }
+
             showTip(R.string.copied_to_clipboard, LENGTH_SHORT);
             return true;
         } else {
@@ -231,7 +241,7 @@ public final class GalleryInfoScene extends ToolbarScene implements EasyRecycler
 
         public InfoAdapter() {
             mInflater = getLayoutInflater2();
-            Assert.assertNotNull(mInflater);
+            AssertUtils.assertNotNull(mInflater);
         }
 
         @Override

@@ -20,18 +20,18 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.os.Build;
-import android.support.annotation.NonNull;
-import android.support.design.widget.NavigationView;
 import android.util.AttributeSet;
-
+import android.widget.LinearLayout;
+import androidx.annotation.NonNull;
 import com.hippo.drawerlayout.DrawerLayoutChild;
 
-public class EhNavigationView extends NavigationView implements DrawerLayoutChild {
+public class EhNavigationView extends LinearLayout implements DrawerLayoutChild {
 
     private static final int SCRIM_COLOR = 0x44000000;
     private static final boolean DRAW_SCRIM = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
     private Paint mPaint;
-    private int mFitPaddingTop;
+    private int mWindowPaddingTop;
+    private int mWindowPaddingBottom;
 
     public EhNavigationView(Context context) {
         super(context);
@@ -58,27 +58,28 @@ public class EhNavigationView extends NavigationView implements DrawerLayoutChil
     public void draw(@NonNull Canvas canvas) {
         super.draw(canvas);
 
-        if (DRAW_SCRIM && mFitPaddingTop > 0) {
+        if (DRAW_SCRIM && mWindowPaddingTop > 0) {
             if (null == mPaint) {
                 mPaint = new Paint();
                 mPaint.setColor(SCRIM_COLOR);
             }
-            canvas.drawRect(0, 0, getWidth(), mFitPaddingTop, mPaint);
+            canvas.drawRect(0, 0, getWidth(), mWindowPaddingTop, mPaint);
         }
     }
 
     @Override
-    public void setFitPadding(int top, int bottom) {
-        mFitPaddingTop = top;
+    public void onGetWindowPadding(int top, int bottom) {
+        mWindowPaddingTop = top;
+        mWindowPaddingBottom = bottom;
     }
 
     @Override
-    public int getLayoutPaddingTop() {
+    public int getAdditionalTopMargin() {
         return 0;
     }
 
     @Override
-    public int getLayoutPaddingBottom() {
-        return 0;
+    public int getAdditionalBottomMargin() {
+        return mWindowPaddingBottom;
     }
 }

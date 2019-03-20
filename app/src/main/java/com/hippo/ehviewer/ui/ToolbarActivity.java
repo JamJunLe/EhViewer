@@ -17,16 +17,29 @@
 package com.hippo.ehviewer.ui;
 
 import android.graphics.drawable.Drawable;
-import android.support.annotation.DrawableRes;
-import android.support.annotation.LayoutRes;
-import android.support.annotation.Nullable;
-import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.ViewGroup;
-
+import androidx.annotation.DrawableRes;
+import androidx.annotation.LayoutRes;
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
 import com.hippo.ehviewer.R;
+import com.hippo.ehviewer.Settings;
 
 public abstract class ToolbarActivity extends EhActivity {
+
+    @Override
+    protected int getThemeResId(int theme) {
+        switch (theme) {
+            case Settings.THEME_LIGHT:
+            default:
+                return R.style.AppTheme_Toolbar;
+            case Settings.THEME_DARK:
+                return R.style.AppTheme_Toolbar_Dark;
+            case Settings.THEME_BLACK:
+                return R.style.AppTheme_Toolbar_Black;
+        }
+    }
 
     @Override
     public void setContentView(@LayoutRes int layoutResID) {

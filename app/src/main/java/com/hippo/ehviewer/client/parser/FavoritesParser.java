@@ -21,16 +21,14 @@ import com.hippo.ehviewer.R;
 import com.hippo.ehviewer.client.data.GalleryInfo;
 import com.hippo.ehviewer.client.exception.EhException;
 import com.hippo.ehviewer.client.exception.ParseException;
+import com.hippo.util.ExceptionUtils;
 import com.hippo.util.JsoupUtils;
-
-import junit.framework.Assert;
-
+import com.hippo.yorozuya.AssertUtils;
+import java.util.List;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-
-import java.util.List;
 
 public class FavoritesParser {
 
@@ -38,6 +36,7 @@ public class FavoritesParser {
         public String[] catArray; // Size 10
         public int[] countArray; // Size 10
         public int pages;
+        public int nextPage;
         public List<GalleryInfo> galleryInfoList;
     }
 
@@ -54,14 +53,15 @@ public class FavoritesParser {
             //noinspection ConstantConditions
             Elements fps = ido.getElementsByClass("fp");
             // Last one is "fp fps"
-            Assert.assertEquals(11, fps.size());
+            AssertUtils.assertEquals(11, fps.size());
 
             for (int i = 0; i < 10; i++) {
                 Element fp = fps.get(i);
-                countArray[i] = ParserUtils.parseInt(fp.child(0).text());
+                countArray[i] = ParserUtils.parseInt(fp.child(0).text(), 0);
                 catArray[i] = ParserUtils.trim(fp.child(2).text());
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
+            ExceptionUtils.throwIfFatal(e);
             e.printStackTrace();
             throw new ParseException("Parse favorites error", body);
         }
@@ -72,6 +72,7 @@ public class FavoritesParser {
         re.catArray = catArray;
         re.countArray = countArray;
         re.pages = result.pages;
+        re.nextPage = result.nextPage;
         re.galleryInfoList = result.galleryInfoList;
 
         return re;

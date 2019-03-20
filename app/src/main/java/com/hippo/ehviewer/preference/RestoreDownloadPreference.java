@@ -20,28 +20,27 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Parcel;
 import android.preference.Preference;
-import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.widget.Toast;
-
+import androidx.annotation.NonNull;
 import com.hippo.ehviewer.EhApplication;
 import com.hippo.ehviewer.EhDB;
 import com.hippo.ehviewer.R;
 import com.hippo.ehviewer.Settings;
 import com.hippo.ehviewer.client.EhEngine;
+import com.hippo.ehviewer.client.EhUrl;
 import com.hippo.ehviewer.client.data.GalleryInfo;
 import com.hippo.ehviewer.download.DownloadManager;
 import com.hippo.ehviewer.spider.SpiderInfo;
 import com.hippo.ehviewer.spider.SpiderQueen;
 import com.hippo.unifile.UniFile;
+import com.hippo.util.ExceptionUtils;
 import com.hippo.yorozuya.IOUtils;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import okhttp3.OkHttpClient;
 
 public class RestoreDownloadPreference extends TaskPreference {
@@ -120,6 +119,10 @@ public class RestoreDownloadPreference extends TaskPreference {
             List<RestoreItem> restoreItemList = new ArrayList<>();
 
             UniFile[] files = dir.listFiles();
+            if (files == null) {
+                return null;
+            }
+
             for (UniFile file: files) {
                 RestoreItem restoreItem = getRestoreItem(file);
                 if (null != restoreItem) {
@@ -132,8 +135,9 @@ public class RestoreDownloadPreference extends TaskPreference {
             }
 
             try {
-                return EhEngine.fillGalleryListByApi(null, mHttpClient, new ArrayList<GalleryInfo>(restoreItemList));
-            } catch (Exception e) {
+                return EhEngine.fillGalleryListByApi(null, mHttpClient, new ArrayList<GalleryInfo>(restoreItemList), EhUrl.getReferer());
+            } catch (Throwable e) {
+                ExceptionUtils.throwIfFatal(e);
                 e.printStackTrace();
                 return null;
             }

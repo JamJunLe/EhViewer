@@ -16,17 +16,23 @@
 
 package com.hippo.ehviewer.download;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import android.os.AsyncTask;
 import android.util.Log;
-
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import com.hippo.ehviewer.Analytics;
 import com.hippo.ehviewer.EhDB;
 import com.hippo.ehviewer.client.data.GalleryInfo;
 import com.hippo.ehviewer.dao.DownloadInfo;
 import com.hippo.ehviewer.dao.DownloadLabel;
+import com.hippo.ehviewer.spider.SpiderDen;
+import com.hippo.ehviewer.spider.SpiderInfo;
 import com.hippo.ehviewer.spider.SpiderQueen;
 import com.hippo.image.Image;
+import com.hippo.unifile.UniFile;
+import com.hippo.util.IoThreadPoolExecutor;
 import com.hippo.yorozuya.ConcurrentPool;
 import com.hippo.yorozuya.MathUtils;
 import com.hippo.yorozuya.ObjectUtils;
@@ -34,7 +40,7 @@ import com.hippo.yorozuya.SimpleHandler;
 import com.hippo.yorozuya.collect.LongList;
 import com.hippo.yorozuya.collect.SparseIJArray;
 import com.hippo.yorozuya.collect.SparseJLArray;
-
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -289,6 +295,9 @@ public class DownloadManager implements SpiderQueen.OnSpiderListener {
             }
             // Make sure download is running
             ensureDownload();
+
+            // Add it to history
+            EhDB.putHistoryInfo(info);
         }
     }
 
@@ -439,6 +448,8 @@ public class DownloadManager implements SpiderQueen.OnSpiderListener {
         for (DownloadInfoListener l: mDownloadInfoListeners) {
             l.onAdd(info, list, list.size() - 1);
         }
+
+        Analytics.downloadGallery(galleryInfo.gid, galleryInfo.token);
     }
 
 
@@ -560,6 +571,52 @@ public class DownloadManager implements SpiderQueen.OnSpiderListener {
         for (DownloadInfoListener l: mDownloadInfoListeners) {
             l.onReload();
         }
+
+        // Ensure download
+        ensureDownload();
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    public void resetAllReadingProgress() {
+        LinkedList<DownloadInfo> list = new LinkedList<>(mAllInfoList);
+
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                GalleryInfo galleryInfo = new GalleryInfo();
+                for (DownloadInfo downloadInfo : list) {
+                    galleryInfo.gid = downloadInfo.gid;
+                    galleryInfo.token = downloadInfo.token;
+                    galleryInfo.title = downloadInfo.title;
+                    galleryInfo.thumb = downloadInfo.thumb;
+                    galleryInfo.category = downloadInfo.category;
+                    galleryInfo.posted = downloadInfo.posted;
+                    galleryInfo.uploader = downloadInfo.uploader;
+                    galleryInfo.rating = downloadInfo.rating;
+
+                    UniFile downloadDir = SpiderDen.getGalleryDownloadDir(galleryInfo);
+                    if (downloadDir == null) {
+                        continue;
+                    }
+                    UniFile file = downloadDir.findFile(".ehviewer");
+                    if (file == null) {
+                        continue;
+                    }
+                    SpiderInfo spiderInfo = SpiderInfo.read(file);
+                    if (spiderInfo == null) {
+                        continue;
+                    }
+                    spiderInfo.startPage = 0;
+
+                    try {
+                        spiderInfo.write(file.openOutputStream());
+                    } catch (IOException e) {
+                        Log.e(TAG, "Can't write SpiderInfo", e);
+                    }
+                }
+                return null;
+            }
+        }.executeOnExecutor(IoThreadPoolExecutor.getInstance());
     }
 
     // Update in DB

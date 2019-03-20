@@ -17,6 +17,58 @@
 
 <resources>
 
+    <declare-styleable name="Theme">
+        <attr name="colorEdgeEffect" format="color"/>
+
+        <attr name="dividerColor" format="color"/>
+        <attr name="toolbarColor" format="color"/>
+
+        <attr name="textColorThemePrimary" format="color"/>
+        <attr name="textColorThemeAccent" format="color"/>
+
+        <!-- For light theme, it's primary dark color -->
+        <!-- For dark theme, it's primary light color -->
+        <!-- For black theme, it's primary light color -->
+        <attr name="drawableColorPrimary" format="color"/>
+        <!-- For light theme, it's secondary dark color -->
+        <!-- For dark theme, it's secondary light color -->
+        <!-- For black theme, it's secondary light color -->
+        <attr name="drawableColorSecondary" format="color"/>
+        <!-- For light theme, it's primary color -->
+        <!-- For dark theme, it's primary light color -->
+        <!-- For black theme, it's primary light color -->
+        <attr name="drawableColorThemePrimary" format="color"/>
+
+        <!-- Color of card background -->
+        <attr name="contentColorPrimary" format="color"/>
+        <attr name="contentColorThemePrimary" format="color"/>
+        <attr name="contentColorThemeAccent" format="color"/>
+        <attr name="contentColorReactive" format="color"/>
+
+        <attr name="widgetColorThemePrimary" format="color"/>
+        <attr name="widgetColorThemeAccent" format="color"/>
+
+        <attr name="guideBackgroundColor" format="color"/>
+        <attr name="guideTitleColor" format="color"/>
+        <attr name="guideTextColor" format="color"/>
+
+        <attr name="progressColor" format="color"/>
+
+        <attr name="tagGroupBackgroundColor" format="color"/>
+        <attr name="tagBackgroundColor" format="color"/>
+
+        <attr name="galleryDetailHeaderTitleColor" format="color"/>
+        <attr name="galleryDetailHeaderBackgroundColor" format="color"/>
+        <attr name="galleryDetailButtonBackgroundColor" format="color"/>
+
+        <attr name="gallerySliderBackgroundColor" format="color"/>
+
+        <attr name="preferenceHeaderBackground" format="reference"/>
+
+        <attr name="toolbarPopupTheme" format="reference"/>
+        <attr name="galleryDetailDivider" format="reference"/>
+    </declare-styleable>
+
     <declare-styleable name="ProgressView">
         <attr name="color"/>
         <attr name="indeterminate" format="boolean"/>
@@ -40,6 +92,11 @@
         </attr>
     </declare-styleable>
 
+    <declare-styleable name="FixedThumb">
+        <attr name="minAspect" format="float"/>
+        <attr name="maxAspect" format="float"/>
+    </declare-styleable>
+
     <declare-styleable name="CheckTextView">
         <attr name="maskColor" format="color"/>
     </declare-styleable>
@@ -47,7 +104,7 @@
     <declare-styleable name="DividerView">
         <attr name="dividerWidth" format="dimension"/>
         <attr name="dividerHeight" format="dimension"/>
-        <attr name="dividerColor" format="color"/>
+        <attr name="dividerColor"/>
     </declare-styleable>
 
     <declare-styleable name="AutoWrapLayout">

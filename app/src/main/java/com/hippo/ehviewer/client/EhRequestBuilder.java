@@ -16,19 +16,21 @@
 
 package com.hippo.ehviewer.client;
 
-import com.hippo.ehviewer.Settings;
 import com.hippo.okhttp.ChromeRequestBuilder;
-
-import java.net.MalformedURLException;
 
 public class EhRequestBuilder extends ChromeRequestBuilder {
 
-    public EhRequestBuilder(String url) throws MalformedURLException {
-        this(url, Settings.getEhConfig());
+    public EhRequestBuilder(String url, String referer) {
+        this(url, referer, null);
     }
 
-    public EhRequestBuilder(String url, EhConfig ehConfig) throws MalformedURLException {
+    public EhRequestBuilder(String url, String referer, String origin) {
         super(url);
-        tag(ehConfig);
+        if (referer != null) {
+            addHeader("Referer", referer);
+        }
+        if (origin != null) {
+            addHeader("Origin", origin);
+        }
     }
 }
