@@ -16,9 +16,9 @@
 
 package com.hippo.ehviewer.client.parser;
 
+import android.text.TextUtils;
 import android.util.Log;
 import androidx.annotation.NonNull;
-import com.hippo.ehviewer.EhApplication;
 import com.hippo.ehviewer.EhDB;
 import com.hippo.ehviewer.client.EhUtils;
 import com.hippo.ehviewer.client.data.GalleryInfo;
@@ -27,7 +27,6 @@ import com.hippo.ehviewer.client.exception.ParseException;
 import com.hippo.util.ExceptionUtils;
 import com.hippo.util.JsoupUtils;
 import com.hippo.yorozuya.NumberUtils;
-import com.hippo.yorozuya.StringUtils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -64,6 +63,7 @@ public class GalleryListParser {
     public static class Result {
         public int pages;
         public int nextPage;
+        public boolean noWatchedTags;
         public List<GalleryInfo> galleryInfoList;
     }
 
@@ -126,14 +126,28 @@ public class GalleryListParser {
         Element glname = JsoupUtils.getElementByClass(e, "glname");
         if (glname != null) {
             Element a = JsoupUtils.getElementByTag(glname, "a");
+            if (a == null) {
+                Element parent = glname.parent();
+                if (parent != null && "a".equals(parent.tagName())) {
+                    a = parent;
+                }
+            }
             if (a != null) {
                 GalleryDetailUrlParser.Result result = GalleryDetailUrlParser.parse(a.attr("href"));
                 if (result != null) {
                     gi.gid = result.gid;
                     gi.token = result.token;
-                    gi.title = a.text().trim();
                 }
             }
+
+            Element child = glname;
+            Elements children = glname.children();
+            while (children.size() != 0) {
+                child = children.get(0);
+                children = child.children();
+            }
+            gi.title = child.text().trim();
+
             Element tbody = JsoupUtils.getElementByTag(glname, "tbody");
             if (tbody != null) {
                 ArrayList<String> tags = new ArrayList<>();
@@ -163,27 +177,35 @@ public class GalleryListParser {
         // Thumb
         Element glthumb = JsoupUtils.getElementByClass(e, "glthumb");
         if (glthumb != null) {
-            // Thumb size
-            Matcher m = PATTERN_THUMB_SIZE.matcher(glthumb.attr("style"));
-            if (m.find()) {
-                gi.thumbWidth = NumberUtils.parseIntSafely(m.group(2), 0);
-                gi.thumbHeight = NumberUtils.parseIntSafely(m.group(1), 0);
-            } else {
-                Log.w(TAG, "Can't parse gallery info thumb size");
-                gi.thumbWidth = 0;
-                gi.thumbHeight = 0;
-            }
-            // Thumb url
-            Element img = glthumb.children().first();
+            Element img = glthumb.select("div:nth-child(1)>img").first();
             if (img != null) {
-                gi.thumb = EhUtils.handleThumbUrlResolution(img.attr("src"));
-            } else {
-                String html = glthumb.html();
-                int index1 = html.indexOf('~');
-                int index2 = StringUtils.ordinalIndexOf(html, '~', 2);
-                if (index1 < index2) {
-                    gi.thumb = EhUtils.handleThumbUrlResolution(
-                        "https://" +StringUtils.replace(html.substring(index1 + 1, index2), "~", "/"));
+                // Thumb size
+                Matcher m = PATTERN_THUMB_SIZE.matcher(img.attr("style"));
+                if (m.find()) {
+                    gi.thumbWidth = NumberUtils.parseIntSafely(m.group(2), 0);
+                    gi.thumbHeight = NumberUtils.parseIntSafely(m.group(1), 0);
+                } else {
+                    Log.w(TAG, "Can't parse gallery info thumb size");
+                    gi.thumbWidth = 0;
+                    gi.thumbHeight = 0;
+                }
+                // Thumb url
+                String url = img.attr("data-src");
+                if (TextUtils.isEmpty(url)) {
+                    url = img.attr("src");
+                }
+                if (TextUtils.isEmpty(url)) {
+                    url = null;
+                }
+                gi.thumb = EhUtils.handleThumbUrlResolution(url);
+            }
+
+            // Pages
+            Element div = glthumb.select("div:nth-child(2)>div:nth-child(2)>div:nth-child(2)").first();
+            if (div != null) {
+                Matcher matcher = PATTERN_PAGES.matcher(div.text());
+                if (matcher.find()) {
+                    gi.pages = NumberUtils.parseIntSafely(matcher.group(1), 0);
                 }
             }
         }
@@ -235,6 +257,7 @@ public class GalleryListParser {
         int uploaderIndex = 0;
         int pagesIndex = 1;
         if (gl == null) {
+            // For extended
             gl = JsoupUtils.getElementByClass(e, "gl3e");
             uploaderIndex = 3;
             pagesIndex = 4;
@@ -254,9 +277,17 @@ public class GalleryListParser {
                 }
             }
         }
-
-        // Downloaded
-        gi.downloaded = EhApplication.getDownloadManager().containDownloadInfo(gi.gid);
+        // For thumbnail
+        Element gl5t = JsoupUtils.getElementByClass(e, "gl5t");
+        if (gl5t != null) {
+            Element div = gl5t.select("div:nth-child(2)>div:nth-child(2)").first();
+            if (div != null) {
+                Matcher matcher = PATTERN_PAGES.matcher(div.text());
+                if (matcher.find()) {
+                    gi.pages = NumberUtils.parseIntSafely(matcher.group(1), 0);
+                }
+            }
+        }
 
         gi.generateSLang();
 
@@ -274,20 +305,24 @@ public class GalleryListParser {
 
             Element e = es.get(es.size() - 1);
             if (e != null) {
-                String href = e.child(0).attr("href");
-                Matcher matcher = PATTERN_NEXT_PAGE.matcher(href);
-                if (matcher.find()) {
-                    result.nextPage = Integer.parseInt(matcher.group(1));
+                e = e.children().first();
+                if (e != null) {
+                    String href = e.attr("href");
+                    Matcher matcher = PATTERN_NEXT_PAGE.matcher(href);
+                    if (matcher.find()) {
+                        result.nextPage = NumberUtils.parseIntSafely(matcher.group(1), 0);
+                    }
                 }
             }
         } catch (Throwable e) {
             ExceptionUtils.throwIfFatal(e);
+            result.noWatchedTags = body.contains("<p>You do not have any watched tags");
             if (body.contains("No hits found</p>")) {
                 result.pages = 0;
                 //noinspection unchecked
                 result.galleryInfoList = Collections.EMPTY_LIST;
                 return result;
-            } else if (body.contains("Currently Popular Recent Galleries")) {
+            } else if (d.getElementsByClass("ptt").isEmpty()) {
                 result.pages = 1;
             } else {
                 result.pages = Integer.MAX_VALUE;
@@ -309,6 +344,9 @@ public class GalleryListParser {
                 if (null != gi) {
                     list.add(gi);
                 }
+            }
+            if (list.isEmpty()) {
+                throw new ParseException("No gallery", body);
             }
             result.galleryInfoList = list;
         } catch (Throwable e) {

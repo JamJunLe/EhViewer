@@ -37,11 +37,17 @@
         app:entryValues="@array/gallery_site_entry_values"
         android:defaultValue="1"/>
 
-    <com.hippo.preference.ActivityPreference
+    <com.hippo.ehviewer.preference.SignInRequiredActivityPreference
         android:key="u_config"
         android:title="@string/settings_u_config"
         android:summary="@string/settings_u_config_summary"
         app:activity="com.hippo.ehviewer.ui.UConfigActivity"/>
+
+    <com.hippo.ehviewer.preference.SignInRequiredActivityPreference
+        android:key="my_tags"
+        android:title="@string/settings_my_tags"
+        android:summary="@string/settings_my_tags_summary"
+        app:activity="com.hippo.ehviewer.ui.MyTagsActivity"/>
 
     <com.hippo.preference.ListPreference
         android:key="theme"
@@ -55,6 +61,14 @@
         android:key="apply_nav_bar_theme_color"
         android:title="@string/settings_eh_apply_nav_bar_theme_color"
         android:defaultValue="false"/>
+
+    <com.hippo.preference.ListPreference
+        android:key="launch_page"
+        android:title="@string/settings_eh_launch_page"
+        android:summary="%s"
+        app:entries="@array/launch_page_entries"
+        app:entryValues="@array/launch_page_entry_values"
+        android:defaultValue="0"/>
 
     <com.hippo.preference.ListPreference
         android:key="list_mode"

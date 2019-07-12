@@ -138,7 +138,7 @@ public class EhClient {
             try {
                 switch (mMethod) {
                     case METHOD_SIGN_IN:
-                        return EhEngine.signIn(this, mOkHttpClient, (String) params[0], (String) params[1], (String) params[2], (String) params[3]);
+                        return EhEngine.signIn(this, mOkHttpClient, (String) params[0], (String) params[1]);
                     case METHOD_GET_GALLERY_LIST:
                         return EhEngine.getGalleryList(this, mOkHttpClient, (String) params[0]);
                     case METHOD_GET_GALLERY_DETAIL:
@@ -148,7 +148,7 @@ public class EhClient {
                     case METHOD_GET_RATE_GALLERY:
                         return EhEngine.rateGallery(this, mOkHttpClient, (Long) params[0], (String) params[1], (Long) params[2], (String) params[3], (Float) params[4]);
                     case METHOD_GET_COMMENT_GALLERY:
-                        return EhEngine.commentGallery(this, mOkHttpClient, (String) params[0], (String) params[1]);
+                        return EhEngine.commentGallery(this, mOkHttpClient, (String) params[0], (String) params[1], (String) params[2]);
                     case METHOD_GET_GALLERY_TOKEN:
                         return EhEngine.getGalleryToken(this, mOkHttpClient, (Long) params[0], (String) params[1], (Integer) params[2]);
                     case METHOD_GET_FAVORITES:

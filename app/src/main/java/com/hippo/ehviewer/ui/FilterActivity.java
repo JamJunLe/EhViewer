@@ -145,36 +145,18 @@ public class FilterActivity extends ToolbarActivity {
     }
 
     private void showDeleteFilterDialog(final Filter filter) {
-        int messageId;
-        switch (filter.mode) {
-            case EhFilter.MODE_TITLE:
-                messageId = R.string.delete_title_filter;
-                break;
-            case EhFilter.MODE_UPLOADER:
-                messageId = R.string.delete_uploader_filter;
-                break;
-            case EhFilter.MODE_TAG:
-                messageId = R.string.delete_tag_filter;
-                break;
-            default:
-                messageId = R.string.delete_filter;
-        }
-        String message = getString(messageId, filter.text);
-
+        String message = getString(R.string.delete_filter, filter.text);
         new AlertDialog.Builder(this)
                 .setMessage(message)
-                .setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        if (DialogInterface.BUTTON_POSITIVE != which || null == mFilterList) {
-                            return;
-                        }
-                        mFilterList.delete(filter);
-                        if (null != mAdapter) {
-                            mAdapter.notifyDataSetChanged();
-                        }
-                        updateView(true);
+                .setPositiveButton(R.string.delete, (dialog, which) -> {
+                    if (DialogInterface.BUTTON_POSITIVE != which || null == mFilterList) {
+                        return;
                     }
+                    mFilterList.delete(filter);
+                    if (null != mAdapter) {
+                        mAdapter.notifyDataSetChanged();
+                    }
+                    updateView(true);
                 }).show();
     }
 
@@ -242,7 +224,7 @@ public class FilterActivity extends ToolbarActivity {
         public FilterHolder(View itemView) {
             super(itemView);
             text = (TextView) ViewUtils.$$(itemView, R.id.text);
-            icon = (ImageView) itemView.findViewById(R.id.icon);
+            icon = itemView.findViewById(R.id.icon);
 
             if (null != icon) {
                 icon.setOnClickListener(this);

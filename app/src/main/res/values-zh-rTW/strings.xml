@@ -25,6 +25,7 @@
     <string name="theme_black">黑色主題</string>
 
     <string name="homepage">首頁</string>
+    <string name="subscription">訂閱</string>
     <string name="whats_hot">熱門</string>
     <string name="favourite">收藏</string>
     <string name="history">歷史</string>
@@ -89,12 +90,15 @@
     <string name="error_cant_create_temp_file">無法建立暫存檔案</string>
     <string name="error_cant_save_image">無法儲存圖片</string>
     <string name="error_invalid_number">無效的數字</string>
+    <string name="error_please_login_first">請先登陸</string>
+    <string name="error_empty_html">頁面內容為空</string>
 
     <string name="app_waring">本應用程式中內容來自網際網路，部分內容可能對您的生理及心理造成難以恢復的傷害。本應用程式的作者不會對由其所造成的任何影響負責。\n\n未成年人應在監護人指導下使用本應用程式。</string>
     <string name="error_username_cannot_empty">使用者名稱欄位不能為空</string>
     <string name="error_password_cannot_empty">密碼欄位不能為空</string>
     <string name="skip_signing_in">略過登入</string>
     <string name="sign_in_failed">登入失敗</string>
+    <string name="sign_in_failed_tip">若持續出錯，請嘗試“通過網頁登入”或“通過 Cookie 登入”。</string>
     <string name="sign_in_failed_plain">這可能是網站更新造成的，也有可能是哪裡出錯了。您可以選擇在登入按鈕下方透過網頁登入或者輸入 cookie，也可以略過登入。略過登入可能導致無法正常使用應用程式。如果你已經在 0.6.x 版登入過了，請先試試“透過 Cookie 登入”。</string>
     <string name="press_twice_exit">再按一次離開</string>
     <string name="content_layout_restore_tip">點擊重試</string>
@@ -123,6 +127,7 @@
     <string name="gallery_list_search_bar_hint_e_hentai">在 E-Hentai 搜尋</string>
     <string name="gallery_list_search_bar_open_gallery">開啟圖庫</string>
     <string name="gallery_list_empty_hit">什麼都沒找到</string>
+    <string name="gallery_list_empty_hit_subscription">請至 設定->EH->我的標籤 訂閱標籤</string>
 
     <string name="search">搜尋</string>
 
@@ -133,11 +138,12 @@
     <string name="search_advance">進階選項</string>
     <string name="search_image">圖片搜尋</string>
     <string name="search_normal_search">一般搜尋</string>
+    <string name="search_subscription_search">訂閱搜尋</string>
     <string name="search_specify_uploader">指定上傳者</string>
     <string name="search_specify_tag">指定標籤</string>
     <string name="search_enable_advance">啟用進階選項</string>
 
-    <string name="search_tip">一般搜尋：就是搜尋。\n\n指定上傳者：列出該上傳者上傳的圖庫。其他選項會被忽略。\n\n指定標籤：列出含有該標籤的圖庫。其他選項會被忽略。</string>
+    <string name="search_tip">一般搜尋：就是搜尋。\n\n訂閱搜素：在訂閱中搜索。\n\n指定上傳者：列出該上傳者上傳的圖庫。其他選項會被忽略。\n\n指定標籤：列出含有該標籤的圖庫。其他選項會被忽略。</string>
 
     <string name="search_sname">搜尋圖庫</string>
     <string name="search_stags">搜尋圖庫的標籤</string>
@@ -148,6 +154,12 @@
     <string name="search_sdt2">搜尋標籤:被噓爆的</string>
     <string name="search_sh">顯示已被移除的的圖庫</string>
     <string name="search_sr">最低評分：</string>
+    <string name="search_sp">頁數：</string>
+    <string name="search_sp_to">到</string>
+    <string name="search_sf">禁用排除項：</string>
+    <string name="search_sfl">語言</string>
+    <string name="search_sfu">上傳者</string>
+    <string name="search_sft">標籤</string>
 
     <string name="select_image">選擇圖片</string>
     <string name="search_uss">使用相似性搜尋</string>
@@ -156,6 +168,10 @@
     <string name="select_image_first">請先選擇圖片</string>
 
     <string name="add_to_favourites">收藏</string>
+    <string name="remove_from_favourites">移除收藏</string>
+
+    <string name="stop_downloading">停止下載</string>
+    <string name="delete_downloads">刪除下載</string>
 
     <string name="quick_search">快速搜尋</string>
     <string name="quick_search_tip">點擊“+”以新增快速搜尋</string>
@@ -216,7 +232,7 @@
     <string name="remove_from_favorite_success">從收藏中移除</string>
     <string name="add_to_favorite_failure">無法新增至收藏</string>
     <string name="remove_from_favorite_failure">無法從收藏中移除</string>
-    <string name="block_the_uploader">把上傳者“%s”加入濾除列表?</string>
+    <string name="filter_the_uploader">把上傳者“%s”加入濾除列表?</string>
     <string name="filter_added">已經新增篩選條件</string>
 
     <!-- Rating -->
@@ -264,6 +280,9 @@
     <string name="comment_successfully">留言成功</string>
     <string name="comment_failed">留言失敗</string>
     <string name="copy_comment_text">複製留言文字</string>
+    <string name="edit_comment">修改留言</string>
+    <string name="edit_comment_successfully">留言已被修改</string>
+    <string name="edit_comment_failed">修改留言失敗</string>
     <string name="vote_up">推</string>
     <string name="cancel_vote_up">收回推</string>
     <string name="vote_down">噓</string>
@@ -274,6 +293,8 @@
     <string name="cancel_vote_down_successfully">已經收回噓了</string>
     <string name="vote_failed">推噓失敗</string>
     <string name="check_vote_status">檢視推噓狀態</string>
+    <string name="click_more_comments">點選載入更多留言</string>
+    <string name="last_edited">上次修改時間：%s</string>
 
     <!-- Gallery Previews -->
     <string name="gallery_previews">圖庫預覽</string>
@@ -334,21 +355,18 @@
     <string name="clear_all_history">清除所有歷史紀錄？</string>
 
     <!-- Filter -->
-    <string name="filter">篩選器</string>
-    <string name="no_filter">篩選列表將會顯示在這裡</string>
+    <string name="filter">遮蔽圖庫</string>
+    <string name="no_filter">這裡是遮蔽列表</string>
     <string name="filter_title">標題</string>
     <string name="filter_uploader">上傳者</string>
     <string name="filter_tag">標籤</string>
-    <string name="filter_tag_namespace">標籤命名空間</string>
-    <string name="delete_title_filter">要將標題篩選項目“%s”移除嗎？</string>
-    <string name="delete_uploader_filter">要將上傳者篩選項目“%s”移除嗎？</string>
-    <string name="delete_tag_filter">要將標籤篩選項目“%s”移除嗎？</string>
-    <string name="delete_filter">要將篩選項目“%s”嗎？</string>
+    <string name="filter_tag_namespace">標籤組</string>
+    <string name="delete_filter">刪除遮蔽項“%s”？</string>
     <string name="tip">提示</string>
-    <string name="add_filter">新增篩選條件</string>
+    <string name="add_filter">新增遮蔽項</string>
     <string name="show_definition">檢視定義</string>
-    <string name="filter_text">篩選文字</string>
-    <string name="filter_tip">標題篩選：排除標題含有該關鍵字的圖庫。\n\n上傳者篩選：排除該上傳者上傳的圖庫。\n\n標籤篩選：排除包含該標籤的圖庫，這會使獲取圖庫列表花費更多時間。\n\n標籤命名空間篩選：排除包含該標籤命名空間（標籤標題）的圖庫，這會使獲取圖庫列表花費更多時間。</string>
+    <string name="filter_text">遮蔽項文字</string>
+    <string name="filter_tip">該遮蔽系統會在 EHentai 網站遮蔽系統的基礎上繼續遮蔽圖庫。\n\n標題遮蔽項：排除標題含有該關鍵字的圖庫。\n\n上傳者遮蔽項：排除該上傳者上傳的圖庫。\n\n標籤遮蔽項：排除包含該標籤的圖庫，這會使獲取圖庫列表花費更多時間。\n\n標籤組遮蔽項：排除包含該標籤組的圖庫，這會使獲取圖庫列表花費更多時間。</string>
 
     <!-- Set Security -->
     <string name="set_pattern_protection">設定圖形解鎖</string>
@@ -360,6 +378,9 @@
     <string name="u_config">EHentai 設定</string>
     <string name="apply">套用</string>
     <string name="apply_tip">點選右上角的勾勾以儲存設定</string>
+
+    <!-- My Tags Activity -->
+    <string name="my_tags">我的標籤</string>
 
     <!-- Hosts Activity -->
     <string name="hosts">自訂hosts.txt</string>
@@ -398,12 +419,15 @@
     <string name="settings_eh_identity_cookies_copy">複製</string>
     <string name="settings_u_config">EHentai 設定</string>
     <string name="settings_u_config_summary">EHentai 網站上的設定</string>
+    <string name="settings_my_tags">我的標籤</string>
+    <string name="settings_my_tags_summary">EHentai 網站上的我的標籤</string>
     <string name="settings_eh_theme">主題</string>
     <string name="settings_eh_theme_light">亮色</string>
     <string name="settings_eh_theme_dark">暗色</string>
     <string name="settings_eh_theme_black">黑色</string>
     <string name="settings_eh_apply_nav_bar_theme_color">導航欄應用主題配色</string>
     <string name="settings_eh_gallery_site">圖庫站台</string>
+    <string name="settings_eh_launch_page">啟動頁</string>
     <string name="settings_eh_list_mode">列表模式</string>
     <string name="settings_eh_list_mode_detail">詳細資料</string>
     <string name="settings_eh_list_mode_thumb">縮圖</string>
@@ -432,8 +456,8 @@
     <string name="settings_eh_show_tag_translations_summary">顯示翻譯後的標籤而非原始文字（需花費時間來下載資料檔案）</string>
     <string name="settings_eh_tag_translations_source">補充翻譯（由 EhTagTranslator 提供）</string>
     <string name="settings_eh_tag_translations_source_url">https://github.com/Mapaler/EhTagTranslator/wiki</string>
-    <string name="settings_eh_filter">篩選</string>
-    <string name="settings_eh_filter_summary">篩選標題，上傳者，標籤和標籤命名空間</string>
+    <string name="settings_eh_filter">遮蔽圖庫</string>
+    <string name="settings_eh_filter_summary">根據標題、上傳者、標籤遮蔽圖庫</string>
     <string name="settings_eh_cellular_network_warning">行動數據警告</string>
 
     <string name="settings_read">閱讀</string>
@@ -535,6 +559,7 @@
     <string name="settings_about">關於</string>
     <string name="settings_about_declaration_summary">EhViewer 與 E-Hentai.org 無任何聯繫</string>
     <string name="settings_about_author">作者</string>
+    <string name="settings_about_latest_release">最新版本</string>
     <string name="settings_about_website">網站</string>
     <string name="settings_about_source">原始碼</string>
     <string name="settings_about_changelog">更新日誌</string>
@@ -677,6 +702,6 @@
     <string name="settings_privacy">隱私</string>
     <string name="settings_privacy_secure">不允許螢幕擷取</string>
     <string name="settings_privacy_secure_summary">啟用後，將無法對本程式進行螢幕擷取，同時，將不會在系統任務切換器中顯示該程式的預覽內容\n\n重新啟動本程式以套用此變更</string>
-    <string name="favorite_name">收藏畫廊</string>
+    <string name="favorite_name">收藏圖庫</string>
 
 </resources>

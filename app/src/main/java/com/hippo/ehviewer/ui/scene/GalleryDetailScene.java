@@ -28,7 +28,6 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.view.Gravity;
@@ -58,7 +57,6 @@ import com.hippo.android.resource.AttrResources;
 import com.hippo.beerbelly.BeerBelly;
 import com.hippo.drawable.RoundSideRectDrawable;
 import com.hippo.drawerlayout.DrawerLayout;
-import com.hippo.ehviewer.Analytics;
 import com.hippo.ehviewer.AppConfig;
 import com.hippo.ehviewer.EhApplication;
 import com.hippo.ehviewer.EhDB;
@@ -73,6 +71,7 @@ import com.hippo.ehviewer.client.EhTagDatabase;
 import com.hippo.ehviewer.client.EhUrl;
 import com.hippo.ehviewer.client.EhUtils;
 import com.hippo.ehviewer.client.data.GalleryComment;
+import com.hippo.ehviewer.client.data.GalleryCommentList;
 import com.hippo.ehviewer.client.data.GalleryDetail;
 import com.hippo.ehviewer.client.data.GalleryInfo;
 import com.hippo.ehviewer.client.data.GalleryTagGroup;
@@ -145,6 +144,8 @@ public class GalleryDetailScene extends BaseScene implements View.OnClickListene
 
     private static final String KEY_GALLERY_DETAIL = "gallery_detail";
     private static final String KEY_REQUEST_ID = "request_id";
+
+    private static final boolean TRANSITION_ANIMATION_DISABLED = true;
 
     /*---------------
      View life cycle
@@ -677,14 +678,6 @@ public class GalleryDetailScene extends BaseScene implements View.OnClickListene
                 .setCallback(callback);
         EhApplication.getEhClient(context).execute(request);
 
-        if (mGalleryDetail != null) {
-            Analytics.viewGallery(mGalleryDetail.gid, mGalleryDetail.token);
-        } else if (mGalleryInfo != null) {
-            Analytics.viewGallery(mGalleryInfo.gid, mGalleryInfo.token);
-        } else {
-            Analytics.viewGallery(mGid, mToken);
-        }
-
         return true;
     }
 
@@ -749,6 +742,8 @@ public class GalleryDetailScene extends BaseScene implements View.OnClickListene
 
         int oldState = mState;
         mState = state;
+
+        animation = !TRANSITION_ANIMATION_DISABLED && animation;
 
         switch (state) {
             case STATE_NORMAL:
@@ -861,7 +856,7 @@ public class GalleryDetailScene extends BaseScene implements View.OnClickListene
         mTorrent.setText(resources.getString(R.string.torrent_count, gd.torrentCount));
 
         bindTags(gd.tags);
-        bindComments(gd.comments);
+        bindComments(gd.comments.comments);
         bindPreviews(gd);
     }
 
@@ -1101,7 +1096,7 @@ public class GalleryDetailScene extends BaseScene implements View.OnClickListene
         if (null != keyword) {
             ListUrlBuilder lub = new ListUrlBuilder();
             lub.setMode(ListUrlBuilder.MODE_NORMAL);
-            lub.setKeyword(keyword);
+            lub.setKeyword("\"" + keyword + "\"");
             GalleryListScene.startScene(this, lub);
             return;
         }
@@ -1191,7 +1186,15 @@ public class GalleryDetailScene extends BaseScene implements View.OnClickListene
         } else if (mDownload == v) {
             GalleryInfo galleryInfo = getGalleryInfo();
             if (galleryInfo != null) {
-                CommonOperations.startDownload(activity, galleryInfo, false);
+                if (EhApplication.getDownloadManager(context).getDownloadState(galleryInfo.gid) == DownloadInfo.STATE_INVALID) {
+                    CommonOperations.startDownload(activity, galleryInfo, false);
+                } else {
+                    new AlertDialog.Builder(context)
+                        .setTitle(R.string.download_remove_dialog_title)
+                        .setMessage(getString(R.string.download_remove_dialog_message, galleryInfo.title))
+                        .setPositiveButton(android.R.string.ok, (dialog1, which1) -> EhApplication.getDownloadManager(context).deleteDownload(galleryInfo.gid))
+                        .show();
+                }
             }
         } else if (mRead == v) {
             GalleryInfo galleryInfo = null;
@@ -1213,11 +1216,7 @@ public class GalleryDetailScene extends BaseScene implements View.OnClickListene
         } else if (mHeartGroup == v) {
             if (mGalleryDetail != null && !mModifingFavorites) {
                 boolean remove = false;
-                if (EhDB.containLocalFavorites(mGalleryDetail.gid)) {
-                    EhDB.removeLocalFavorites(mGalleryDetail.gid);
-                    remove = true;
-                }
-                if (mGalleryDetail.isFavorited) {
+                if (EhDB.containLocalFavorites(mGalleryDetail.gid) || mGalleryDetail.isFavorited) {
                     mModifingFavorites = true;
                     CommonOperations.removeFromFavorites(activity, mGalleryDetail,
                             new ModifyFavoritesListener(context,
@@ -1292,7 +1291,7 @@ public class GalleryDetailScene extends BaseScene implements View.OnClickListene
             args.putString(GalleryCommentsScene.KEY_API_KEY, mGalleryDetail.apiKey);
             args.putLong(GalleryCommentsScene.KEY_GID, mGalleryDetail.gid);
             args.putString(GalleryCommentsScene.KEY_TOKEN, mGalleryDetail.token);
-            args.putParcelableArray(GalleryCommentsScene.KEY_COMMENTS, mGalleryDetail.comments);
+            args.putParcelable(GalleryCommentsScene.KEY_COMMENT_LIST, mGalleryDetail.comments);
             startScene(new Announcer(GalleryCommentsScene.class)
                     .setArgs(args)
                     .setRequestCode(this, REQUEST_CODE_COMMENT_GALLERY));
@@ -1327,41 +1326,49 @@ public class GalleryDetailScene extends BaseScene implements View.OnClickListene
         }
     }
 
-    private void showBlockUploaderDialog() {
+    private void showFilterUploaderDialog() {
         Context context = getContext2();
-        if (null == context) {
-            return;
-        }
-        final String uploader = getUploader();
-        if (null == uploader) {
+        String uploader = getUploader();
+        if (context == null || uploader == null) {
             return;
         }
 
         new AlertDialog.Builder(context)
-                .setMessage(getString(R.string.block_the_uploader, uploader))
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        if (DialogInterface.BUTTON_POSITIVE != which) {
-                            return;
-                        }
-
-                        Filter filter = new Filter();
-                        filter.mode = EhFilter.MODE_UPLOADER;
-                        filter.text = uploader;
-                        EhFilter.getInstance().addFilter(filter);
-
-                        showTip(R.string.filter_added, LENGTH_SHORT);
+                .setMessage(getString(R.string.filter_the_uploader, uploader))
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                    if (which != DialogInterface.BUTTON_POSITIVE) {
+                        return;
                     }
+
+                    Filter filter = new Filter();
+                    filter.mode = EhFilter.MODE_UPLOADER;
+                    filter.text = uploader;
+                    EhFilter.getInstance().addFilter(filter);
+
+                    showTip(R.string.filter_added, LENGTH_SHORT);
                 }).show();
     }
 
-    private void addTagFilter(String tag) {
-        Filter filter = new Filter();
-        filter.mode = EhFilter.MODE_TAG;
-        filter.text = tag;
-        EhFilter.getInstance().addFilter(filter);
-        showTip(R.string.filter_added, LENGTH_SHORT);
+    private void showFilterTagDialog(String tag) {
+        Context context = getContext2();
+        if (context == null) {
+            return;
+        }
+
+        new AlertDialog.Builder(context)
+                .setMessage(getString(R.string.filter_the_tag, tag))
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                    if (which != DialogInterface.BUTTON_POSITIVE) {
+                        return;
+                    }
+
+                    Filter filter = new Filter();
+                    filter.mode = EhFilter.MODE_TAG;
+                    filter.text = tag;
+                    EhFilter.getInstance().addFilter(filter);
+
+                    showTip(R.string.filter_added, LENGTH_SHORT);
+                }).show();
     }
 
     private void showTagDialog(final String tag) {
@@ -1380,17 +1387,14 @@ public class GalleryDetailScene extends BaseScene implements View.OnClickListene
 
         new AlertDialog.Builder(context)
                 .setTitle(tag)
-                .setItems(R.array.tag_menu_entries, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        switch (which) {
-                            case 0:
-                                UrlOpener.openUrl(context, EhUrl.getTagDefinitionUrl(tag2), false);
-                                break;
-                            case 1:
-                                addTagFilter(tag);
-                                break;
-                        }
+                .setItems(R.array.tag_menu_entries, (dialog, which) -> {
+                    switch (which) {
+                        case 0:
+                            UrlOpener.openUrl(context, EhUrl.getTagDefinitionUrl(tag2), false);
+                            break;
+                        case 1:
+                            showFilterTagDialog(tag);
+                            break;
                     }
                 }).show();
     }
@@ -1403,7 +1407,7 @@ public class GalleryDetailScene extends BaseScene implements View.OnClickListene
         }
 
         if (mUploader == v) {
-            showBlockUploaderDialog();
+            showFilterUploaderDialog();
         } else if (mDownload == v) {
             GalleryInfo galleryInfo = getGalleryInfo();
             if (galleryInfo != null) {
@@ -1443,16 +1447,12 @@ public class GalleryDetailScene extends BaseScene implements View.OnClickListene
                 if (resultCode != RESULT_OK || data == null){
                     break;
                 }
-                Parcelable[] array = data.getParcelableArray(GalleryCommentsScene.KEY_COMMENTS);
-                if (!(array instanceof GalleryComment[])) {
-                    break;
-                }
-                GalleryComment[] comments = (GalleryComment[]) array;
-                if (mGalleryDetail == null) {
+                GalleryCommentList comments = data.getParcelable(GalleryCommentsScene.KEY_COMMENT_LIST);
+                if (mGalleryDetail == null && comments == null) {
                     break;
                 }
                 mGalleryDetail.comments = comments;
-                bindComments(comments);
+                bindComments(comments.comments);
                 break;
             default:
                 super.onSceneResult(requestCode, resultCode, data);
@@ -1759,7 +1759,6 @@ public class GalleryDetailScene extends BaseScene implements View.OnClickListene
                 request.setArgs(mGalleryDetail.gid, mGalleryDetail.token, mArchiveFormParamOr, res);
                 request.setCallback(new DownloadArchiveListener(context, activity.getStageId(), getTag()));
                 EhApplication.getEhClient(context).execute(request);
-                Analytics.downloadArchive(mGalleryDetail.gid, mGalleryDetail.token);
             }
 
             if (mDialog != null) {
@@ -2013,8 +2012,6 @@ public class GalleryDetailScene extends BaseScene implements View.OnClickListene
                     .setCallback(new RateGalleryListener(context,
                             activity.getStageId(), getTag(), mGalleryDetail.gid));
             EhApplication.getEhClient(context).execute(request);
-
-            Analytics.rateGallery(mGalleryDetail.gid, mGalleryDetail.token);
         }
     }
 

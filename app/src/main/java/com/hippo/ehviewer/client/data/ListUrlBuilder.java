@@ -27,6 +27,7 @@ import com.hippo.ehviewer.client.EhUtils;
 import com.hippo.ehviewer.dao.QuickSearch;
 import com.hippo.ehviewer.widget.AdvanceSearchTable;
 import com.hippo.network.UrlBuilder;
+import com.hippo.yorozuya.NumberUtils;
 import com.hippo.yorozuya.StringUtils;
 import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Retention;
@@ -36,7 +37,7 @@ import java.net.URLEncoder;
 
 public class ListUrlBuilder implements Cloneable, Parcelable {
 
-    @IntDef({MODE_NORMAL, MODE_UPLOADER, MODE_TAG, MODE_WHATS_HOT, MODE_IMAGE_SEARCH})
+    @IntDef({MODE_NORMAL, MODE_UPLOADER, MODE_TAG, MODE_WHATS_HOT, MODE_IMAGE_SEARCH, MODE_SUBSCRIPTION})
     @Retention(RetentionPolicy.SOURCE)
     private @interface Mode {}
 
@@ -46,6 +47,7 @@ public class ListUrlBuilder implements Cloneable, Parcelable {
     public static final int MODE_TAG = 0x2;
     public static final int MODE_WHATS_HOT = 0x3;
     public static final int MODE_IMAGE_SEARCH = 0x4;
+    public static final int MODE_SUBSCRIPTION = 0x5;
 
     public static final int DEFAULT_ADVANCE = AdvanceSearchTable.SNAME | AdvanceSearchTable.STAGS;
     public static final int DEFAULT_MIN_RATING = 2;
@@ -60,6 +62,8 @@ public class ListUrlBuilder implements Cloneable, Parcelable {
 
     private int mAdvanceSearch = -1;
     private int mMinRating = -1;
+    private int mPageFrom = -1;
+    private int mPageTo = -1;
 
     private String mImagePath;
     private boolean mUseSimilarityScan;
@@ -76,6 +80,8 @@ public class ListUrlBuilder implements Cloneable, Parcelable {
         mKeyword = null;
         mAdvanceSearch = -1;
         mMinRating = -1;
+        mPageFrom = -1;
+        mPageTo = -1;
         mImagePath = null;
         mUseSimilarityScan = false;
         mOnlySearchCovers = false;
@@ -140,6 +146,22 @@ public class ListUrlBuilder implements Cloneable, Parcelable {
         mMinRating = minRating;
     }
 
+    public int getPageFrom() {
+        return mPageFrom;
+    }
+
+    public void setPageFrom(int pageFrom) {
+        mPageFrom = pageFrom;
+    }
+
+    public int getPageTo() {
+        return mPageTo;
+    }
+
+    public void setPageTo(int pageTo) {
+        mPageTo = pageTo;
+    }
+
     @Nullable
     public String getImagePath() {
         return mImagePath;
@@ -184,6 +206,8 @@ public class ListUrlBuilder implements Cloneable, Parcelable {
         mKeyword = lub.mKeyword;
         mAdvanceSearch = lub.mAdvanceSearch;
         mMinRating = lub.mMinRating;
+        mPageFrom = lub.mPageFrom;
+        mPageTo = lub.mPageTo;
         mImagePath = lub.mImagePath;
         mUseSimilarityScan = lub.mUseSimilarityScan;
         mOnlySearchCovers = lub.mOnlySearchCovers;
@@ -196,6 +220,8 @@ public class ListUrlBuilder implements Cloneable, Parcelable {
         mKeyword = q.keyword;
         mAdvanceSearch = q.advanceSearch;
         mMinRating = q.minRating;
+        mPageFrom = q.pageFrom;
+        mPageTo = q.pageTo;
         mImagePath = null;
         mUseSimilarityScan = false;
         mOnlySearchCovers = false;
@@ -209,6 +235,8 @@ public class ListUrlBuilder implements Cloneable, Parcelable {
         q.keyword = mKeyword;
         q.advanceSearch = mAdvanceSearch;
         q.minRating = mMinRating;
+        q.pageFrom = mPageFrom;
+        q.pageTo = mPageTo;
         return q;
     }
 
@@ -232,6 +260,12 @@ public class ListUrlBuilder implements Cloneable, Parcelable {
         if (q.minRating != mMinRating) {
             return false;
         }
+        if (q.pageFrom != mPageFrom) {
+            return false;
+        }
+        if (q.pageTo != mPageTo) {
+            return false;
+        }
 
         return true;
     }
@@ -248,122 +282,164 @@ public class ListUrlBuilder implements Cloneable, Parcelable {
         }
 
         String[] querys = StringUtils.split(query, '&');
-        boolean apply = false;
         int category = 0;
         String keyword = null;
         boolean enableAdvanceSearch = false;
         int advanceSearch = 0;
         boolean enableMinRating = false;
-        int minRating = 0;
-        for (int i = 0, size = querys.length; i < size; i++) {
-            String str = querys[i];
+        int minRating = -1;
+        boolean enablePage = false;
+        int pageFrom = -1;
+        int pageTo = -1;
+        for (String str : querys) {
             int index = str.indexOf('=');
             if (index < 0) {
                 continue;
             }
             String key = str.substring(0, index);
             String value = str.substring(index + 1);
-            if ("f_doujinshi".equals(key)) {
-                if ("1".equals(value)) {
-                    category |= EhConfig.DOUJINSHI;
-                }
-            } else if ("f_manga".equals(key)) {
-                if ("1".equals(value)) {
-                    category |= EhConfig.MANGA;
-                }
-            } else if ("f_artistcg".equals(key)) {
-                if ("1".equals(value)) {
-                    category |= EhConfig.ARTIST_CG;
-                }
-            } else if ("f_gamecg".equals(key)) {
-                if ("1".equals(value)) {
-                    category |= EhConfig.GAME_CG;
-                }
-            } else if ("f_western".equals(key)) {
-                if ("1".equals(value)) {
-                    category |= EhConfig.WESTERN;
-                }
-            } else if ("f_non-h".equals(key)) {
-                if ("1".equals(value)) {
-                    category |= EhConfig.NON_H;
-                }
-            } else if ("f_imageset".equals(key)) {
-                if ("1".equals(value)) {
-                    category |= EhConfig.IMAGE_SET;
-                }
-            } else if ("f_cosplay".equals(key)) {
-                if ("1".equals(value)) {
-                    category |= EhConfig.COSPLAY;
-                }
-            } else if ("f_asianporn".equals(key)) {
-                if ("1".equals(value)) {
-                    category |= EhConfig.ASIAN_PORN;
-                }
-            } else if ("f_misc".equals(key)) {
-                if ("1".equals(value)) {
-                    category |= EhConfig.MISC;
-                }
-            } else if ("f_search".equals(key)) {
-                try {
-                    keyword = URLDecoder.decode(value, "utf-8");
-                } catch (UnsupportedEncodingException | IllegalArgumentException e) {
-                    // Ignore
-                }
-            } else if ("advsearch".equals(key)) {
-                if ("1".equals(value)) {
-                    enableAdvanceSearch = true;
-                }
-            } else if ("f_sname".equals(key)) {
-                if ("on".equals(value)) {
-                    advanceSearch |= AdvanceSearchTable.SNAME;
-                }
-            } else if ("f_stags".equals(key)) {
-                if ("on".equals(value)) {
-                    advanceSearch |= AdvanceSearchTable.STAGS;
-                }
-            } else if ("f_sdesc".equals(key)) {
-                if ("on".equals(value)) {
-                    advanceSearch |= AdvanceSearchTable.SDESC;
-                }
-            } else if ("f_storr".equals(key)) {
-                if ("on".equals(value)) {
-                    advanceSearch |= AdvanceSearchTable.STORR;
-                }
-            } else if ("f_sto".equals(key)) {
-                if ("on".equals(value)) {
-                    advanceSearch |= AdvanceSearchTable.STO;
-                }
-            } else if ("f_sdt1".equals(key)) {
-                if ("on".equals(value)) {
-                    advanceSearch |= AdvanceSearchTable.SDT1;
-                }
-            } else if ("f_sdt2".equals(key)) {
-                if ("on".equals(value)) {
-                    advanceSearch |= AdvanceSearchTable.SDT2;
-                }
-            } else if ("f_sh".equals(key)) {
-                if ("on".equals(value)) {
-                    advanceSearch |= AdvanceSearchTable.SH;
-                }
-            } else if ("f_sr".equals(key)) {
-                if ("on".equals(value)) {
-                    enableMinRating = true;
-                }
-            } else if ("f_srdd".equals(key)) {
-                try {
-                    minRating = Integer.parseInt(value);
-                } catch (NumberFormatException e) {
-                    // Ignore
-                }
-            } else if ("f_apply".equals(key)) {
-                if ("Apply+Filter".equals(value)) {
-                    apply = true;
-                }
+            switch (key) {
+                case "f_cats":
+                    int cats = NumberUtils.parseIntSafely(value, EhConfig.ALL_CATEGORY);
+                    category |= (~cats) & EhConfig.ALL_CATEGORY;
+                    break;
+                case "f_doujinshi":
+                    if ("1".equals(value)) {
+                        category |= EhConfig.DOUJINSHI;
+                    }
+                    break;
+                case "f_manga":
+                    if ("1".equals(value)) {
+                        category |= EhConfig.MANGA;
+                    }
+                    break;
+                case "f_artistcg":
+                    if ("1".equals(value)) {
+                        category |= EhConfig.ARTIST_CG;
+                    }
+                    break;
+                case "f_gamecg":
+                    if ("1".equals(value)) {
+                        category |= EhConfig.GAME_CG;
+                    }
+                    break;
+                case "f_western":
+                    if ("1".equals(value)) {
+                        category |= EhConfig.WESTERN;
+                    }
+                    break;
+                case "f_non-h":
+                    if ("1".equals(value)) {
+                        category |= EhConfig.NON_H;
+                    }
+                    break;
+                case "f_imageset":
+                    if ("1".equals(value)) {
+                        category |= EhConfig.IMAGE_SET;
+                    }
+                    break;
+                case "f_cosplay":
+                    if ("1".equals(value)) {
+                        category |= EhConfig.COSPLAY;
+                    }
+                    break;
+                case "f_asianporn":
+                    if ("1".equals(value)) {
+                        category |= EhConfig.ASIAN_PORN;
+                    }
+                    break;
+                case "f_misc":
+                    if ("1".equals(value)) {
+                        category |= EhConfig.MISC;
+                    }
+                    break;
+                case "f_search":
+                    try {
+                        keyword = URLDecoder.decode(value, "utf-8");
+                    } catch (UnsupportedEncodingException | IllegalArgumentException e) {
+                        // Ignore
+                    }
+                    break;
+                case "advsearch":
+                    if ("1".equals(value)) {
+                        enableAdvanceSearch = true;
+                    }
+                    break;
+                case "f_sname":
+                    if ("on".equals(value)) {
+                        advanceSearch |= AdvanceSearchTable.SNAME;
+                    }
+                    break;
+                case "f_stags":
+                    if ("on".equals(value)) {
+                        advanceSearch |= AdvanceSearchTable.STAGS;
+                    }
+                    break;
+                case "f_sdesc":
+                    if ("on".equals(value)) {
+                        advanceSearch |= AdvanceSearchTable.SDESC;
+                    }
+                    break;
+                case "f_storr":
+                    if ("on".equals(value)) {
+                        advanceSearch |= AdvanceSearchTable.STORR;
+                    }
+                    break;
+                case "f_sto":
+                    if ("on".equals(value)) {
+                        advanceSearch |= AdvanceSearchTable.STO;
+                    }
+                    break;
+                case "f_sdt1":
+                    if ("on".equals(value)) {
+                        advanceSearch |= AdvanceSearchTable.SDT1;
+                    }
+                    break;
+                case "f_sdt2":
+                    if ("on".equals(value)) {
+                        advanceSearch |= AdvanceSearchTable.SDT2;
+                    }
+                    break;
+                case "f_sh":
+                    if ("on".equals(value)) {
+                        advanceSearch |= AdvanceSearchTable.SH;
+                    }
+                    break;
+                case "f_sfl":
+                    if ("on".equals(value)) {
+                        advanceSearch |= AdvanceSearchTable.SFL;
+                    }
+                    break;
+                case "f_sfu":
+                    if ("on".equals(value)) {
+                        advanceSearch |= AdvanceSearchTable.SFU;
+                    }
+                    break;
+                case "f_sft":
+                    if ("on".equals(value)) {
+                        advanceSearch |= AdvanceSearchTable.SFT;
+                    }
+                    break;
+                case "f_sr":
+                    if ("on".equals(value)) {
+                        enableMinRating = true;
+                    }
+                    break;
+                case "f_srdd":
+                    minRating = NumberUtils.parseIntSafely(value, -1);
+                    break;
+                case "f_sp":
+                    if ("on".equals(value)) {
+                        enablePage = true;
+                    }
+                    break;
+                case "f_spf":
+                    pageFrom = NumberUtils.parseIntSafely(value, -1);
+                    break;
+                case "f_spt":
+                    pageTo = NumberUtils.parseIntSafely(value, -1);
+                    break;
             }
-        }
-
-        if (!apply) {
-            return;
         }
 
         mCategory = category;
@@ -375,6 +451,13 @@ public class ListUrlBuilder implements Cloneable, Parcelable {
             } else {
                 mMinRating = -1;
             }
+            if (enablePage) {
+                mPageFrom = pageFrom;
+                mPageTo = pageTo;
+            } else {
+                mPageFrom = -1;
+                mPageTo = -1;
+            }
         } else {
             mAdvanceSearch = -1;
         }
@@ -383,8 +466,16 @@ public class ListUrlBuilder implements Cloneable, Parcelable {
     public String build() {
         switch (mMode) {
             default:
-            case MODE_NORMAL: {
-                UrlBuilder ub = new UrlBuilder(EhUrl.getHost());
+            case MODE_NORMAL:
+            case MODE_SUBSCRIPTION: {
+                String url;
+                if (mMode == MODE_NORMAL) {
+                    url = EhUrl.getHost();
+                } else {
+                    url = EhUrl.getWatchedUrl();
+                }
+
+                UrlBuilder ub = new UrlBuilder(url);
                 if (mCategory != EhUtils.NONE) {
                     ub.addQuery("f_cats", (~mCategory) & EhConfig.ALL_CATEGORY);
                 }
@@ -414,10 +505,19 @@ public class ListUrlBuilder implements Cloneable, Parcelable {
                     if((mAdvanceSearch & AdvanceSearchTable.SDT1) != 0) ub.addQuery("f_sdt1", "on");
                     if((mAdvanceSearch & AdvanceSearchTable.SDT2) != 0) ub.addQuery("f_sdt2", "on");
                     if((mAdvanceSearch & AdvanceSearchTable.SH) != 0) ub.addQuery("f_sh", "on");
+                    if((mAdvanceSearch & AdvanceSearchTable.SFL) != 0) ub.addQuery("f_sfl", "on");
+                    if((mAdvanceSearch & AdvanceSearchTable.SFU) != 0) ub.addQuery("f_sfu", "on");
+                    if((mAdvanceSearch & AdvanceSearchTable.SFT) != 0) ub.addQuery("f_sft", "on");
                     // Set min star
                     if (mMinRating != -1) {
                         ub.addQuery("f_sr", "on");
                         ub.addQuery("f_srdd", mMinRating);
+                    }
+                    // Pages
+                    if (mPageFrom != -1 || mPageTo != -1) {
+                        ub.addQuery("f_sp", "on");
+                        ub.addQuery("f_spf", mPageFrom != -1 ? Integer.toString(mPageFrom) : "");
+                        ub.addQuery("f_spt", mPageTo != -1 ? Integer.toString(mPageTo) : "");
                     }
                 }
                 return ub.build();
@@ -468,6 +568,8 @@ public class ListUrlBuilder implements Cloneable, Parcelable {
         dest.writeString(this.mKeyword);
         dest.writeInt(this.mAdvanceSearch);
         dest.writeInt(this.mMinRating);
+        dest.writeInt(this.mPageFrom);
+        dest.writeInt(this.mPageTo);
         dest.writeString(this.mImagePath);
         dest.writeByte(mUseSimilarityScan ? (byte) 1 : (byte) 0);
         dest.writeByte(mOnlySearchCovers ? (byte) 1 : (byte) 0);
@@ -485,6 +587,8 @@ public class ListUrlBuilder implements Cloneable, Parcelable {
         this.mKeyword = in.readString();
         this.mAdvanceSearch = in.readInt();
         this.mMinRating = in.readInt();
+        this.mPageFrom = in.readInt();
+        this.mPageTo = in.readInt();
         this.mImagePath = in.readString();
         this.mUseSimilarityScan = in.readByte() != 0;
         this.mOnlySearchCovers = in.readByte() != 0;

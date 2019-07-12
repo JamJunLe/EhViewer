@@ -40,6 +40,7 @@
     <string name="misc" translatable="false">MISC</string>
 
     <string name="homepage">Homepage</string>
+    <string name="subscription">Subscription</string>
     <string name="whats_hot">What\'s hot</string>
     <string name="favourite">Favourite</string>
     <string name="history">History</string>
@@ -131,12 +132,15 @@
     <string name="error_cant_create_temp_file">Couldn\'t create temp file</string>
     <string name="error_cant_save_image">Can\'t save image</string>
     <string name="error_invalid_number">Invalid number</string>
+    <string name="error_please_login_first">Please login first</string>
+    <string name="error_empty_html">Empty page</string>
 
     <string name="app_waring">The content of this application is from the Internet. Some of it may do physical or mental harm to you. You have learnt the risks above and would like to undertake them.</string>
     <string name="error_username_cannot_empty">Username cannot be an empty string</string>
     <string name="error_password_cannot_empty">Password cannot be an empty string</string>
     <string name="skip_signing_in">Continue without signing in</string>
     <string name="sign_in_failed">Sign in failed</string>
+    <string name="sign_in_failed_tip">If this issue continues, try \"Sign in via WebView\" or \"Sign in via cookies\"</string>
     <string name="sign_in_failed_plain">Perhaps it is a mistake due to website update or something wrong happened. You may try sign in via WebView or enter cookie or skip signing in under sign in button. But you may be a "Sad Panda" after skipping signing in. Try "Sign in via cookies" first if you had signed in on 0.6.x version.</string>
     <string name="press_twice_exit">Press twice to exit</string>
     <string name="content_layout_restore_tip">Tap to retry</string>
@@ -165,6 +169,7 @@
     <string name="gallery_list_search_bar_hint_e_hentai">Search E-Hentai</string>
     <string name="gallery_list_search_bar_open_gallery">Open the gallery</string>
     <string name="gallery_list_empty_hit">The World is Big and the panda sit alone</string>
+    <string name="gallery_list_empty_hit_subscription">Subscribe to tags in Settings->EH->My tags</string>
 
     <string name="search">Search</string>
 
@@ -175,11 +180,12 @@
     <string name="search_advance">Advance Options</string>
     <string name="search_image">Image Search</string>
     <string name="search_normal_search">Normal search</string>
+    <string name="search_subscription_search">Subscription search</string>
     <string name="search_specify_uploader">Specify uploader</string>
     <string name="search_specify_tag">Specify tag</string>
     <string name="search_enable_advance">Enable advance options</string>
 
-    <string name="search_tip">Normal search: Simply search.\n\nSpecify uploader: Search for galleries uploaded by the specified uploader. All other options will be ignored.\n\nSpecify tag: Search for galleries that contain the specified tag. Only one tag accepted. Other options will be ignored.</string>
+    <string name="search_tip">Normal search: Simply search.\n\nSubscription search: Search in subscriptions.\n\nSpecify uploader: Search for galleries uploaded by the specified uploader. All other options will be ignored.\n\nSpecify tag: Search for galleries that contain the specified tag. Only one tag accepted. Other options will be ignored.</string>
 
     <string name="search_sname">Search Gallery</string>
     <string name="search_stags">Search Gallery Tags</string>
@@ -190,6 +196,14 @@
     <string name="search_sdt2">Search Downvoted Tags</string>
     <string name="search_sh">Show Expunged Galleries</string>
     <string name="search_sr">Minimum Rating:</string>
+    <string name="search_sp">Pages:</string>
+    <string name="search_sp_to">to</string>
+    <!-- A placeholder for other languages -->
+    <string name="search_sp_suffix"/>
+    <string name="search_sf">Disable default filters for:</string>
+    <string name="search_sfl">Language</string>
+    <string name="search_sfu">Uploader</string>
+    <string name="search_sft">Tags</string>
 
     <string name="select_image">Select image</string>
     <string name="search_uss">Use similarity scan</string>
@@ -198,6 +212,10 @@
     <string name="select_image_first">Please select image first</string>
 
     <string name="add_to_favourites">Add to favourites</string>
+    <string name="remove_from_favourites">Remove from favourites</string>
+
+    <string name="stop_downloading">Stop downloading</string>
+    <string name="delete_downloads">Delete downloads</string>
 
     <string name="quick_search">Quick search</string>
     <string name="quick_search_tip">Tap \"+\" to add Quick Search</string>
@@ -259,8 +277,9 @@
     <string name="remove_from_favorite_success">Removed from favorites</string>
     <string name="add_to_favorite_failure">Failed to add to favorites</string>
     <string name="remove_from_favorite_failure">Failed to remove from favorites</string>
-    <string name="block_the_uploader">Add the uploader \"%s\" to filter list?</string>
-    <string name="filter_added">Filter added</string>
+    <string name="filter_the_uploader">Block the uploader \"%s\"?</string>
+    <string name="filter_the_tag">Block the tag \"%s\"?</string>
+    <string name="filter_added">Blocker added</string>
 
     <!-- Rating -->
     <string name="rating10">MASTERPIECE</string>
@@ -308,6 +327,9 @@
     <string name="comment_successfully">Comment post successfully</string>
     <string name="comment_failed">Failed to post the comment</string>
     <string name="copy_comment_text">Copy comment text</string>
+    <string name="edit_comment">Edit comment</string>
+    <string name="edit_comment_successfully">The comment has been edited</string>
+    <string name="edit_comment_failed">Failed to edit the comment</string>
     <string name="vote_up">Vote up</string>
     <string name="cancel_vote_up">Cancel up-vote</string>
     <string name="vote_down">Vote down</string>
@@ -318,6 +340,8 @@
     <string name="cancel_vote_down_successfully">Down-vote cancelled successfully</string>
     <string name="vote_failed">Vote failed</string>
     <string name="check_vote_status">View vote details</string>
+    <string name="click_more_comments">Click to load more comments</string>
+    <string name="last_edited">Last edited: %s</string>
 
     <!-- Gallery Previews -->
     <string name="gallery_previews">Gallery Previews</string>
@@ -378,21 +402,18 @@
     <string name="clear_all_history">Clear all history?</string>
 
     <!-- Filter -->
-    <string name="filter">Filter</string>
-    <string name="no_filter">Filters will be shown here</string>
+    <string name="filter">Block gallery</string>
+    <string name="no_filter">Blockers will be shown here</string>
     <string name="filter_title">Title</string>
     <string name="filter_uploader">Uploader</string>
     <string name="filter_tag">Tag</string>
     <string name="filter_tag_namespace">Tag namespace</string>
-    <string name="delete_title_filter">Delete title filter \"%s\"?</string>
-    <string name="delete_uploader_filter">Delete uploader filter \"%s\"?</string>
-    <string name="delete_tag_filter">Delete tag filter \"%s\"?</string>
-    <string name="delete_filter">Delete filter \"%s\"?</string>
+    <string name="delete_filter">Delete blocker \"%s\"?</string>
     <string name="tip">Tip</string>
-    <string name="add_filter">Add filter</string>
+    <string name="add_filter">Add blocker</string>
     <string name="show_definition">Show definition</string>
-    <string name="filter_text">Filter text</string>
-    <string name="filter_tip">Title Filter: exclude the gallery whose title contains the word.\n\nUploader Filter: exclude the gallery which was uploaded by the uploader.\n\nTag Filter: exclude the gallery which contain the tag, it takes more time to get gallery list.\n\nTag Namespace Filter: exclude the gallery which contain the tag namespace, it takes more time to get gallery list.</string>
+    <string name="filter_text">Blocker text</string>
+    <string name="filter_tip">This blocking system filters the result of EHentai website blocking system.\n\nTitle Blocker: exclude the gallery whose title contains the word.\n\nUploader Blocker: exclude the gallery which was uploaded by the uploader.\n\nTag Blocker: exclude the gallery which contain the tag, it takes more time to get gallery list.\n\nTag Namespace Blocker: exclude the gallery which contain the tag namespace, it takes more time to get gallery list.</string>
 
     <!-- Set Security -->
     <string name="set_pattern_protection">Set pattern protection</string>
@@ -404,6 +425,9 @@
     <string name="u_config">EHentai settings</string>
     <string name="apply">Apply</string>
     <string name="apply_tip">Tap the check mark to save the settings</string>
+
+    <!-- My Tags Activity -->
+    <string name="my_tags">My tags</string>
 
     <!-- Hosts Activity -->
     <string name="hosts">Custom hosts.txt</string>
@@ -442,12 +466,15 @@
     <string name="settings_eh_identity_cookies_copy">Copy</string>
     <string name="settings_u_config">EHentai settings</string>
     <string name="settings_u_config_summary">Settings on EHentai website</string>
+    <string name="settings_my_tags">My tags</string>
+    <string name="settings_my_tags_summary">My tags on EHentai website</string>
     <string name="settings_eh_theme">Theme</string>
     <string name="settings_eh_theme_light">Light</string>
     <string name="settings_eh_theme_dark">Dark</string>
     <string name="settings_eh_theme_black">Black</string>
     <string name="settings_eh_apply_nav_bar_theme_color">Apply theme color to navigation bar</string>
     <string name="settings_eh_gallery_site">Gallery site</string>
+    <string name="settings_eh_launch_page">Launch page</string>
     <string name="settings_eh_list_mode">List mode</string>
     <string name="settings_eh_list_mode_detail">Detail</string>
     <string name="settings_eh_list_mode_thumb">Thumb</string>
@@ -476,8 +503,8 @@
     <string name="settings_eh_show_tag_translations_summary">Show tag translations instead of the original text (It takes time to download the data file)</string>
     <string name="settings_eh_tag_translations_source">Placeholder</string>
     <string name="settings_eh_tag_translations_source_url">https://placeholder</string>
-    <string name="settings_eh_filter">Filter</string>
-    <string name="settings_eh_filter_summary">Filter by title, uploader, tag and tag namespace</string>
+    <string name="settings_eh_filter">Block gallery</string>
+    <string name="settings_eh_filter_summary">Block gallery by title, uploader and tags</string>
     <string name="settings_eh_cellular_network_warning">Cellular network warning</string>
 
     <string name="settings_read">Read</string>
@@ -485,6 +512,7 @@
     <string name="settings_read_screen_rotation_default">Default</string>
     <string name="settings_read_screen_rotation_portrait">Portrait</string>
     <string name="settings_read_screen_rotation_landscape">Landscape</string>
+    <string name="settings_read_screen_rotation_sensor">Auto rotate</string>
     <string name="settings_read_reading_direction">Reading direction</string>
     <string name="settings_read_reading_direction_left_to_right">Left to right</string>
     <string name="settings_read_reading_direction_right_to_Left">Right to left</string>
@@ -582,6 +610,7 @@
     <string name="settings_about_author">Author</string>
     <string name="settings_about_author_summary" translatable="false">Hippo &lt;ehviewersu$gmail.com&gt;</string>
     <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_latest_release">Latest release</string>
     <string name="settings_about_website">Website</string>
     <string name="settings_about_source">Source</string>
     <string name="settings_about_changelog">Changelog</string>

@@ -175,7 +175,7 @@ public final class MainActivity extends StageActivity
             return new Announcer(SelectSiteScene.class);
         } else {
             Bundle args = new Bundle();
-            args.putString(GalleryListScene.KEY_ACTION, GalleryListScene.ACTION_HOMEPAGE);
+            args.putString(GalleryListScene.KEY_ACTION, Settings.getLaunchPageGalleryListSceneAction());
             return new Announcer(GalleryListScene.class).setArgs(args);
         }
     }
@@ -309,7 +309,7 @@ public final class MainActivity extends StageActivity
                     finish();
                 } else {
                     Bundle args = new Bundle();
-                    args.putString(GalleryListScene.KEY_ACTION, GalleryListScene.ACTION_HOMEPAGE);
+                    args.putString(GalleryListScene.KEY_ACTION, Settings.getLaunchPageGalleryListSceneAction());
                     startScene(processAnnouncer(new Announcer(GalleryListScene.class).setArgs(args)));
                 }
             }
@@ -693,6 +693,11 @@ public final class MainActivity extends StageActivity
         if (id == R.id.nav_homepage) {
             Bundle args = new Bundle();
             args.putString(GalleryListScene.KEY_ACTION, GalleryListScene.ACTION_HOMEPAGE);
+            startSceneFirstly(new Announcer(GalleryListScene.class)
+                    .setArgs(args));
+        } else if (id == R.id.nav_subscription) {
+            Bundle args = new Bundle();
+            args.putString(GalleryListScene.KEY_ACTION, GalleryListScene.ACTION_SUBSCRIPTION);
             startSceneFirstly(new Announcer(GalleryListScene.class)
                     .setArgs(args));
         } else if (id == R.id.nav_whats_hot) {

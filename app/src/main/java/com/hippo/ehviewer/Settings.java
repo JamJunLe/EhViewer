@@ -28,6 +28,7 @@ import com.hippo.ehviewer.client.EhConfig;
 import com.hippo.ehviewer.client.EhUtils;
 import com.hippo.ehviewer.client.data.FavListUrlBuilder;
 import com.hippo.ehviewer.ui.CommonOperations;
+import com.hippo.ehviewer.ui.scene.GalleryListScene;
 import com.hippo.glgallery.GalleryView;
 import com.hippo.unifile.UniFile;
 import com.hippo.util.ExceptionUtils;
@@ -261,7 +262,7 @@ public class Settings {
     }
 
     public static final String KEY_APPLY_NAV_BAR_THEME_COLOR = "apply_nav_bar_theme_color";
-    private static final boolean DEFAULT_APPLY_NAV_BAR_THEME_COLOR = false;
+    private static final boolean DEFAULT_APPLY_NAV_BAR_THEME_COLOR = true;
 
     public static boolean getApplyNavBarThemeColor() {
         return getBoolean(KEY_APPLY_NAV_BAR_THEME_COLOR, DEFAULT_APPLY_NAV_BAR_THEME_COLOR);
@@ -276,6 +277,22 @@ public class Settings {
 
     public static void putGallerySite(int value) {
         putIntToStr(KEY_GALLERY_SITE, value);
+    }
+
+    private static final String KEY_LAUNCH_PAGE = "launch_page";
+    private static final int DEFAULT_LAUNCH_PAGE = 0;
+
+    public static String getLaunchPageGalleryListSceneAction() {
+        int value = getIntFromStr(KEY_LAUNCH_PAGE, DEFAULT_LAUNCH_PAGE);
+        switch (value) {
+            default:
+            case 0:
+                return GalleryListScene.ACTION_HOMEPAGE;
+            case 1:
+                return GalleryListScene.ACTION_SUBSCRIPTION;
+            case 2:
+                return GalleryListScene.ACTION_WHATS_HOT;
+        }
     }
 
     public static final String KEY_LIST_MODE = "list_mode";

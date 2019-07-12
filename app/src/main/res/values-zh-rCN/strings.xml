@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright 2016 Hippo Seven
+  ~ Copyright 2016 Hippo Sevenerror_please_login_first
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
     <string name="theme_black">黑色主题</string>
 
     <string name="homepage">主页</string>
+    <string name="subscription">订阅</string>
     <string name="whats_hot">热门</string>
     <string name="favourite">收藏</string>
     <string name="history">历史</string>
@@ -89,12 +90,15 @@
     <string name="error_cant_create_temp_file">无法创建临时文件</string>
     <string name="error_cant_save_image">无法保存图片</string>
     <string name="error_invalid_number">非法数字</string>
+    <string name="error_please_login_first">请先登陆</string>
+    <string name="error_empty_html">页面内容为空</string>
 
     <string name="app_waring">本应用中内容来自互联网，部分内容可能对您的生理及心理造成难以恢复的伤害。本应用作者不会对由本应用造成的任何后果负责。\n\n未成年人应在监护人指导下使用本应用。</string>
     <string name="error_username_cannot_empty">用户名不可为空</string>
     <string name="error_password_cannot_empty">密码不可为空</string>
     <string name="skip_signing_in">跳过登录</string>
     <string name="sign_in_failed">登录失败</string>
+    <string name="sign_in_failed_tip">若持续出错，请尝试“通过网页登录”或“通过 Cookie 登录”。</string>
     <string name="sign_in_failed_plain">这可能是网站更新导致的，也有可能是发生了奇怪的事情。您可以选择在登录按钮下方通过网页登录或者输入 cookie，或者跳过登录。跳过登录可能导致无法正常使用应用。如果你已经在 0.6.x 版登录过了，请优先尝试选择“通过 Cookie 登录”。</string>
     <string name="press_twice_exit">再按一次退出</string>
     <string name="content_layout_restore_tip">点击重试</string>
@@ -123,6 +127,7 @@
     <string name="gallery_list_search_bar_hint_e_hentai">搜索 E-Hentai</string>
     <string name="gallery_list_search_bar_open_gallery">打开画廊</string>
     <string name="gallery_list_empty_hit">什么都没有找到</string>
+    <string name="gallery_list_empty_hit_subscription">请至 设置->EH->我的标签 订阅标签</string>
 
     <string name="search">搜索</string>
 
@@ -133,11 +138,12 @@
     <string name="search_advance">高级选项</string>
     <string name="search_image">图片搜索</string>
     <string name="search_normal_search">一般搜索</string>
+    <string name="search_subscription_search">订阅搜索</string>
     <string name="search_specify_uploader">指定上传者</string>
     <string name="search_specify_tag">指定标签</string>
     <string name="search_enable_advance">启用高级选项</string>
 
-    <string name="search_tip">一般搜索：就是搜索。\n\n指定上传者：列出该上传者上传的画廊。其他选项会被忽略。\n\n指定标签：列出含有该标签的画廊。其他选项会被忽略。</string>
+    <string name="search_tip">一般搜索：就是搜索。\n\n订阅搜素：在订阅中搜索。\n\n指定上传者：列出该上传者上传的画廊。其他选项会被忽略。\n\n指定标签：列出含有该标签的画廊。其他选项会被忽略。</string>
 
     <string name="search_sname">搜索画廊</string>
     <string name="search_stags">搜索画廊标签</string>
@@ -148,6 +154,12 @@
     <string name="search_sdt2">搜索差评标签</string>
     <string name="search_sh">显示被删除的画廊</string>
     <string name="search_sr">最低评分：</string>
+    <string name="search_sp">页数：</string>
+    <string name="search_sp_to">到</string>
+    <string name="search_sf">禁用排除项：</string>
+    <string name="search_sfl">语言</string>
+    <string name="search_sfu">上传者</string>
+    <string name="search_sft">标签</string>
 
     <string name="select_image">选择图片</string>
     <string name="search_uss">使用相似搜索</string>
@@ -156,6 +168,10 @@
     <string name="select_image_first">请先选择图片</string>
 
     <string name="add_to_favourites">收藏</string>
+    <string name="remove_from_favourites">移除收藏</string>
+
+    <string name="stop_downloading">停止下载</string>
+    <string name="delete_downloads">删除下载</string>
 
     <string name="quick_search">快速搜索</string>
     <string name="quick_search_tip">点击“+”来添加快速搜索</string>
@@ -216,8 +232,9 @@
     <string name="remove_from_favorite_success">移除收藏</string>
     <string name="add_to_favorite_failure">添加收藏失败</string>
     <string name="remove_from_favorite_failure">移除收藏失败</string>
-    <string name="block_the_uploader">添加上传者过滤项“%s”？</string>
-    <string name="filter_added">已添加过滤项</string>
+    <string name="filter_the_uploader">屏蔽上传者“%s”？</string>
+    <string name="filter_the_tag">屏蔽标签“%s”？</string>
+    <string name="filter_added">已添加屏蔽项</string>
 
     <!-- Rating -->
     <string name="rating10">根本把持不住</string>
@@ -264,6 +281,9 @@
     <string name="comment_successfully">评论成功</string>
     <string name="comment_failed">评论失败</string>
     <string name="copy_comment_text">复制评论文字</string>
+    <string name="edit_comment">修改评论</string>
+    <string name="edit_comment_successfully">评论已被修改</string>
+    <string name="edit_comment_failed">修改评论失败</string>
     <string name="vote_up">深表赞同</string>
     <string name="cancel_vote_up">不再深表赞同</string>
     <string name="vote_down">垃圾评论</string>
@@ -274,6 +294,8 @@
     <string name="cancel_vote_down_successfully">已不再钦定为垃圾评论</string>
     <string name="vote_failed">投票失败</string>
     <string name="check_vote_status">查看投票情况</string>
+    <string name="click_more_comments">点击加载更多评论</string>
+    <string name="last_edited">上次修改时间：%s</string>
 
     <!-- Gallery Previews -->
     <string name="gallery_previews">画廊预览</string>
@@ -334,21 +356,18 @@
     <string name="clear_all_history">清除所有阅读历史？</string>
 
     <!-- Filter -->
-    <string name="filter">过滤</string>
-    <string name="no_filter">这里是过滤列表</string>
+    <string name="filter">屏蔽画廊</string>
+    <string name="no_filter">这里是屏蔽列表</string>
     <string name="filter_title">标题</string>
     <string name="filter_uploader">上传者</string>
     <string name="filter_tag">标签</string>
     <string name="filter_tag_namespace">标签组</string>
-    <string name="delete_title_filter">删除标题过滤项“%s”？</string>
-    <string name="delete_uploader_filter">删除上传者过滤项“%s”？</string>
-    <string name="delete_tag_filter">删除标签过滤项“%s”？</string>
-    <string name="delete_filter">删除过滤项“%s”？</string>
+    <string name="delete_filter">删除屏蔽项“%s”？</string>
     <string name="tip">提示</string>
-    <string name="add_filter">添加过滤项</string>
+    <string name="add_filter">添加屏蔽项</string>
     <string name="show_definition">查看定义</string>
-    <string name="filter_text">过滤项文本</string>
-    <string name="filter_tip">标题过滤项：排除标题含有该关键字的画廊。\n\n上传者过滤项：排除该上传者上传的画廊。\n\n标签过滤项：排除包含该标签的画廊，这会使获取画廊列表花费更多时间。\n\n标签组过滤项：排除包含该标签组的画廊，这会使获取画廊列表花费更多时间。</string>
+    <string name="filter_text">屏蔽项文本</string>
+    <string name="filter_tip">该屏蔽系统会在 EHentai 网站屏蔽系统的基础上继续屏蔽画廊。\n\n标题屏蔽项：排除标题含有该关键字的画廊。\n\n上传者屏蔽项：排除该上传者上传的画廊。\n\n标签屏蔽项：排除包含该标签的画廊，这会使获取画廊列表花费更多时间。\n\n标签组屏蔽项：排除包含该标签组的画廊，这会使获取画廊列表花费更多时间。</string>
 
     <!-- Set Security -->
     <string name="set_pattern_protection">设置图案保护</string>
@@ -360,6 +379,9 @@
     <string name="u_config">EHentai 设置</string>
     <string name="apply">应用</string>
     <string name="apply_tip">点击右上角的对勾来保存设置</string>
+
+    <!-- My Tags Activity -->
+    <string name="my_tags">我的标签</string>
 
     <!-- Hosts Activity -->
     <string name="hosts">自定义 hosts.txt</string>
@@ -399,12 +421,15 @@
     <string name="settings_eh_identity_cookies_copy">复制</string>
     <string name="settings_u_config">EHentai 设置</string>
     <string name="settings_u_config_summary">EHentai 网站上的设置</string>
+    <string name="settings_my_tags">我的标签</string>
+    <string name="settings_my_tags_summary">EHentai 网站上的我的标签</string>
     <string name="settings_eh_theme">主题</string>
     <string name="settings_eh_theme_light">亮色</string>
     <string name="settings_eh_theme_dark">暗色</string>
     <string name="settings_eh_theme_black">黑色</string>
     <string name="settings_eh_apply_nav_bar_theme_color">导航栏应用主题配色</string>
     <string name="settings_eh_gallery_site">画廊站点</string>
+    <string name="settings_eh_launch_page">启动页</string>
     <string name="settings_eh_list_mode">列表模式</string>
     <string name="settings_eh_list_mode_detail">详情</string>
     <string name="settings_eh_list_mode_thumb">缩略图</string>
@@ -433,8 +458,8 @@
     <string name="settings_eh_show_tag_translations_summary">显示翻译后的标签而非原始文字（需花费时间来下载数据文件）</string>
     <string name="settings_eh_tag_translations_source">补充翻译（由 EhTagTranslator 提供）</string>
     <string name="settings_eh_tag_translations_source_url">https://github.com/Mapaler/EhTagTranslator/wiki</string>
-    <string name="settings_eh_filter">过滤</string>
-    <string name="settings_eh_filter_summary">过滤标题，上传者，标签和标签组</string>
+    <string name="settings_eh_filter">屏蔽画廊</string>
+    <string name="settings_eh_filter_summary">根据标题、上传者、标签屏蔽画廊</string>
     <string name="settings_eh_cellular_network_warning">移动网络警告</string>
 
     <string name="settings_read">阅读</string>
@@ -442,6 +467,7 @@
     <string name="settings_read_screen_rotation_default">系统默认</string>
     <string name="settings_read_screen_rotation_portrait">竖屏</string>
     <string name="settings_read_screen_rotation_landscape">横屏</string>
+    <string name="settings_read_screen_rotation_sensor">自动旋转</string>
     <string name="settings_read_reading_direction">阅读方向</string>
     <string name="settings_read_reading_direction_left_to_right">从左至右</string>
     <string name="settings_read_reading_direction_right_to_Left">从右至左</string>
@@ -536,6 +562,7 @@
     <string name="settings_about">关于</string>
     <string name="settings_about_declaration_summary">EhViewer 与 E-Hentai.org 无任何联系</string>
     <string name="settings_about_author">作者</string>
+    <string name="settings_about_latest_release">最新版本</string>
     <string name="settings_about_website">网站</string>
     <string name="settings_about_source">源码</string>
     <string name="settings_about_changelog">更新日志</string>

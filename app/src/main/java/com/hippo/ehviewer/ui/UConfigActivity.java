@@ -21,8 +21,6 @@ package com.hippo.ehviewer.ui;
  */
 
 import android.annotation.SuppressLint;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
@@ -31,20 +29,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
-import android.webkit.JsPromptResult;
-import android.webkit.JsResult;
-import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.EditText;
-import android.widget.TextView;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import com.google.android.material.snackbar.Snackbar;
 import com.hippo.ehviewer.EhApplication;
 import com.hippo.ehviewer.R;
 import com.hippo.ehviewer.client.EhCookieStore;
 import com.hippo.ehviewer.client.EhUrl;
+import com.hippo.ehviewer.widget.DialogWebChromeClient;
 import com.hippo.widget.ProgressView;
 import okhttp3.Cookie;
 import okhttp3.HttpUrl;
@@ -87,7 +80,7 @@ public class UConfigActivity extends ToolbarActivity {
     webView = (WebView) findViewById(R.id.webview);
     webView.getSettings().setJavaScriptEnabled(true);
     webView.setWebViewClient(new UConfigWebViewClient());
-    webView.setWebChromeClient(new UConfigWebChromeClient());
+    webView.setWebChromeClient(new DialogWebChromeClient(this));
     webView.loadUrl(url);
     progress = (ProgressView) findViewById(R.id.progress);
 
@@ -181,71 +174,6 @@ public class UConfigActivity extends ToolbarActivity {
     public void onPageFinished(WebView view, String url) {
       progress.setVisibility(View.GONE);
       loaded = true;
-    }
-  }
-
-  private class UConfigWebChromeClient extends WebChromeClient {
-
-    private Context context = UConfigActivity.this;
-
-    @Override
-    public boolean onJsPrompt(WebView view, String url, String message, String defaultValue,
-        final JsPromptResult result) {
-
-      View promptView = UConfigActivity.this.getLayoutInflater()
-          .inflate(R.layout.dialog_js_prompt, null, false);
-      TextView messageView = (TextView) promptView.findViewById(R.id.message);
-      messageView.setText(message);
-      final EditText valueView = (EditText) promptView.findViewById(R.id.value);
-      valueView.setText(defaultValue);
-
-      new AlertDialog.Builder(context)
-          .setView(promptView)
-          .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-              result.confirm(valueView.getText().toString());
-            }
-          })
-          .setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialog) {
-              result.cancel();
-            }
-          })
-          .show();
-
-      return true;
-    }
-
-    private void showMessageDialog(String message, final JsResult result) {
-      new AlertDialog.Builder(context)
-          .setMessage(message)
-          .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-              result.confirm();
-            }
-          })
-          .setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialog) {
-              result.cancel();
-            }
-          })
-          .show();
-    }
-
-    @Override
-    public boolean onJsAlert(WebView view, String url, String message, final JsResult result) {
-      showMessageDialog(message, result);
-      return true;
-    }
-
-    @Override
-    public boolean onJsConfirm(WebView view, String url, String message, final JsResult result) {
-      showMessageDialog(message, result);
-      return true;
     }
   }
 }

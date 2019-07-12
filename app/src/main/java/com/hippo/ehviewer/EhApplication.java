@@ -92,8 +92,11 @@ public class EhApplication extends RecordingApplication {
     private SimpleDiskCache mSpiderInfoCache;
     private DownloadManager mDownloadManager;
     private Hosts mHosts;
+    private FavouriteStatusRouter mFavouriteStatusRouter;
 
     private final List<Activity> mActivityList = new ArrayList<>();
+
+    private boolean initialized = false;
 
     public static EhApplication getInstance() {
         return instance;
@@ -107,7 +110,8 @@ public class EhApplication extends RecordingApplication {
         Thread.UncaughtExceptionHandler handler = Thread.getDefaultUncaughtExceptionHandler();
         Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
             try {
-                if (Settings.getSaveCrashLog()) {
+                // Always save crash file if onCreate() is not done
+                if (!initialized || Settings.getSaveCrashLog()) {
                     Crash.saveCrashLog(instance, e);
                 }
             } catch (Throwable ignored) { }
@@ -183,6 +187,8 @@ public class EhApplication extends RecordingApplication {
         if (DEBUG_PRINT_NATIVE_MEMORY || DEBUG_PRINT_IMAGE_COUNT) {
             debugPrint();
         }
+
+        initialized = true;
     }
 
     private void clearTempDir() {
@@ -342,6 +348,12 @@ public class EhApplication extends RecordingApplication {
         if (application.mGalleryDetailCache == null) {
             // Max size 25, 3 min timeout
             application.mGalleryDetailCache = new LruCache<>(25);
+            getFavouriteStatusRouter().addListener((gid, slot) -> {
+                GalleryDetail gd = application.mGalleryDetailCache.get(gid);
+                if (gd != null) {
+                    gd.favoriteSlot = slot;
+                }
+            });
         }
         return application.mGalleryDetailCache;
     }
@@ -377,6 +389,20 @@ public class EhApplication extends RecordingApplication {
             application.mHosts = new Hosts(application, "hosts.db");
         }
         return application.mHosts;
+    }
+
+    @NonNull
+    public static FavouriteStatusRouter getFavouriteStatusRouter() {
+        return getFavouriteStatusRouter(getInstance());
+    }
+
+    @NonNull
+    public static FavouriteStatusRouter getFavouriteStatusRouter(@NonNull Context context) {
+        EhApplication application = ((EhApplication) context.getApplicationContext());
+        if (application.mFavouriteStatusRouter == null) {
+            application.mFavouriteStatusRouter = new FavouriteStatusRouter();
+        }
+        return application.mFavouriteStatusRouter;
     }
 
     @NonNull

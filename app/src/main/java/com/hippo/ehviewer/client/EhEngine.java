@@ -24,7 +24,7 @@ import com.hippo.ehviewer.AppConfig;
 import com.hippo.ehviewer.GetText;
 import com.hippo.ehviewer.R;
 import com.hippo.ehviewer.Settings;
-import com.hippo.ehviewer.client.data.GalleryComment;
+import com.hippo.ehviewer.client.data.GalleryCommentList;
 import com.hippo.ehviewer.client.data.GalleryDetail;
 import com.hippo.ehviewer.client.data.GalleryInfo;
 import com.hippo.ehviewer.client.data.PreviewSet;
@@ -102,8 +102,10 @@ public class EhEngine {
         }
 
         if (e instanceof ParseException) {
-            if (body != null && !body.contains("<")){
+            if (body != null && !body.contains("<")) {
                 throw new EhException(body);
+            } else if (TextUtils.isEmpty(body)) {
+                throw new EhException(GetText.getString(R.string.error_empty_html));
             } else {
                 if (Settings.getSaveParseErrorBody()) {
                     AppConfig.saveParseErrorBody((ParseException) e);
@@ -132,17 +134,13 @@ public class EhEngine {
     }
 
     public static String signIn(@Nullable EhClient.Task task, OkHttpClient okHttpClient,
-            String username, String password, String recaptchaChallenge, String recaptchaResponse) throws Throwable {
+            String username, String password) throws Throwable {
         FormBody.Builder builder = new FormBody.Builder()
                 .add("UserName", username)
                 .add("PassWord", password)
                 .add("submit", "Log me in")
                 .add("CookieDate", "1")
                 .add("temporary_https", "off");
-        if (!TextUtils.isEmpty(recaptchaChallenge) && !TextUtils.isEmpty(recaptchaResponse)) {
-            builder.add("recaptcha_challenge_field", recaptchaChallenge);
-            builder.add("recaptcha_response_field", recaptchaResponse);
-        }
         String url = EhUrl.API_SIGN_IN;
         String referer = "https://forums.e-hentai.org/index.php?act=Login&CODE=00";
         String origin = "https://forums.e-hentai.org";
@@ -202,8 +200,8 @@ public class EhEngine {
         }
 
         boolean needApi = (filter && sEhFilter.needTags() && !hasTags) ||
-            (Settings.getShowGalleryPages() && !hasPages) ||
-            hasRated;
+                (Settings.getShowGalleryPages() && !hasPages) ||
+                hasRated;
         if (needApi) {
             fillGalleryListByApi(task, okHttpClient, list, url);
         }
@@ -212,7 +210,8 @@ public class EhEngine {
         if (filter) {
             for (int i = 0, n = list.size(); i < n; i++) {
                 GalleryInfo info = list.get(i);
-                if (!sEhFilter.filterTag(info) || !sEhFilter.filterTagNamespace(info)) {
+                // Thumbnail mode need filter uploader again
+                if (!sEhFilter.filterUploader(info) || !sEhFilter.filterTag(info) || !sEhFilter.filterTagNamespace(info)) {
                     list.remove(i);
                     i--;
                     n--;
@@ -416,10 +415,15 @@ public class EhEngine {
         }
     }
 
-    public static GalleryComment[] commentGallery(@Nullable EhClient.Task task,
-            OkHttpClient okHttpClient, String url, String comment) throws Throwable {
-        FormBody.Builder builder = new FormBody.Builder()
-                .add("commenttext_new", comment);
+    public static GalleryCommentList commentGallery(@Nullable EhClient.Task task,
+            OkHttpClient okHttpClient, String url, String comment, String id) throws Throwable {
+        FormBody.Builder builder = new FormBody.Builder();
+        if (id == null) {
+            builder.add("commenttext_new", comment);
+        } else {
+            builder.add("commenttext_edit", comment);
+            builder.add("edit_comment", id);
+        }
         String origin = EhUrl.getOrigin();
         Log.d(TAG, url);
         Request request = new EhRequestBuilder(url, url, origin)

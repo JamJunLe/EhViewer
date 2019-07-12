@@ -22,6 +22,7 @@
     <!-- Category -->
 
     <string name="homepage">Página de inicio</string>
+    <string name="subscription">Suscripción</string>
     <string name="whats_hot">Destacado</string>
     <string name="favourite">Favoritos</string>
     <string name="history">Historial</string>
@@ -64,9 +65,9 @@
     <string name="error_cannot_parse_the_url">No se puede analizar el URL</string>
     <string name="error_not_folder_path">Sin ruta del directorio</string>
     <string name="error_no_provider">Sin proveedor</string>
-    <string name="error_decoding_failed">Decodificacion fallida</string>
+    <string name="error_decoding_failed">Decodificación fallida</string>
     <string name="error_not_found">No encontrado</string>
-    <string name="error_empty">Vacio</string>
+    <string name="error_empty">Vacío</string>
     <string name="error_reading_failed">Lectura Fallida</string>
     <string name="error_out_of_range">Fuera de rango</string>
     <string name="error_write_failed">Falla en la escritura</string>
@@ -82,9 +83,9 @@
     <string name="error_username_cannot_empty">El usuario no puede estar vacío</string>
     <string name="skip_signing_in">Saltar inicio de sesión</string>
     <string name="sign_in_failed">Inicio de sesión fallido</string>
-    <string name="sign_in_failed_plain">Tal ves sea debido a un error de actualización de el sitio web o algo mal sucedió. Puedes intentar iniciar sesión vía WebView, ingresar una cookie o saltar el inicio de sesión presionando el boton de abajo.\nEs posible que te salga un \"Panda Triste\" después de saltar el inicio de sesión. Intente \"Ingresar via cookies\" primero si ha iniciado sesión en la versión 0.6.x de HeViewer.</string>
+    <string name="sign_in_failed_plain">Tal ves sea debido a un error de actualización de el sitio web o algo mal sucedió. Puedes intentar iniciar sesión vía WebView, ingresar una cookie o saltar el inicio de sesión presionando el botón de abajo.\nEs posible que te salga un \"Panda Triste\" después de saltar el inicio de sesión. Intente \"Ingresar vía cookies\" primero si ha iniciado sesión en la versión 0.6.x de HeViewer.</string>
     <string name="press_twice_exit">Presione una vez más para salir</string>
-    <string name="content_layout_restore_tip">Puslar para reintentar</string>
+    <string name="content_layout_restore_tip">Pulsar para reintentar</string>
     <string name="write_rationale">EhViewer solicitará el permiso WRITE_EXTERNAL_STORAGE para descargar galerías. ¿Desea conceder el permiso?</string>
     <string name="you_rejected_me">Me has rechazado :(</string>
     <string name="analytics_explain">Would you mind if the developer collected your device information and your usage? It will help the developer a lot.&lt;br&gt;&lt;br&gt;Data analysis service is provided by Google Analytics for Firebase. Its privacy policy can be found at &lt;a href=&quot;https://www.google.com/policies/privacy/&quot;&gt;https://www.google.com/policies/privacy/&lt;/a&gt;.&lt;br&gt;&lt;br&gt;If you agree to join data analysis, your device information and your usage will be collected, including but not limited to Android API version, equipment model, language residence, the application version, conversion time, function times. The developer promise that these information will NOT be collected, including phone number, e-mail address, IMEI.&lt;br&gt;&lt;br&gt;Your information will not be collected until you agree to join data analysis.&lt;br&gt;&lt;br&gt;The collected information will be analyzed by Google Analytics for Firebase. The analysis report can only be viewed by the developer of this application.</string>
@@ -119,7 +120,7 @@
     <string name="search_specify_tag">Etiquetas específicas</string>
     <string name="search_enable_advance">Habilitar opciones avanzadas</string>
 
-    <string name="search_tip">Búsqueda normal: Solo busca.\n\nUploader especifico: Listar de galerías subidas por el uploader. Otras opciones serán ignoradas.\n\nEtiquetas específicas: Listar las galerías que contienen la etiqueta. Solo se acepta una etiqueta. Otras opciones serán ignoradas.</string>
+    <string name="search_tip">Búsqueda normal: Solo busca.\n\nBúsqueda de suscripción: Buscar etiquetas suscriptas.n\nUploader especifico: Listar de galerías subidas por el uploader. Otras opciones serán ignoradas.\n\nEtiquetas específicas: Listar las galerías que contienen la etiqueta. Solo se acepta una etiqueta. Otras opciones serán ignoradas.</string>
 
     <string name="search_sname">Buscar galerías</string>
     <string name="search_stags">Buscar etiquetas de galería</string>
@@ -130,12 +131,18 @@
     <string name="search_sdt2">Buscar etiquetas pobres</string>
     <string name="search_sh">Mostrar galerías borradas</string>
     <string name="search_sr">Valoración mínima:</string>
-
+    <string name="search_subscription_search">Búsqueda de etiquetas suscritas</string>
     <string name="select_image">Seleccionar imagen</string>
     <string name="search_uss">Usar búsqueda similar</string>
     <string name="search_osc">Buscar solo portadas</string>
     <string name="search_se">Mostrar borrados</string>
     <string name="select_image_first">Seleccione la imagen primero</string>
+    <string name="search_sp">Páginas:</string>
+    <string name="search_sp_to">hasta</string>
+    <string name="search_sf">Deshabilitar filtros para:</string>
+    <string name="search_sfl">Lenguaje</string>
+    <string name="search_sfu">Uploader</string>
+    <string name="search_sft">Etiqueta</string>
 
     <string name="quick_search">Búsqueda rápida</string>
     <string name="quick_search_tip">Pulsar \"+\" para añadir a la búsqueda rápida</string>
@@ -190,13 +197,11 @@
     <string name="torrents">Torrents</string>
     <string name="favorited">Favorito</string>
     <string name="not_favorited">No en favoritos</string>
-    <string name="add_favorites_dialog_title">Añadir a favoritos</string>
-    <string name="remember_favorite_collection">Recordar favoritos</string>
+    <string name="add_favorites_dialog_title">Añadir a favoritos - Elige categoría</string>
+    <string name="remember_favorite_collection">Recordar categoría</string>
     <string name="remove_from_favorite_success">Eliminado de favoritos</string>
     <string name="add_to_favorite_failure">No se ha podido agregar a favoritos</string>
     <string name="remove_from_favorite_failure">Error al borrar de favoritos</string>
-    <string name="block_the_uploader">¿Añadir el uploader \"%s\" a la lista de filtros?</string>
-    <string name="filter_added">Filtro añadido</string>
 
     <!-- Rating -->
     <string name="rating10">OBRA MAESTRA</string>
@@ -253,7 +258,7 @@
     <string name="check_vote_status">Verificar estado del voto</string>
 
     <!-- Gallery Previews -->
-    <string name="gallery_previews">Vista previa de la galeria</string>
+    <string name="gallery_previews">Vista previa de la galería</string>
     <string name="go_to">Ir a</string>
 
     <!-- Download -->
@@ -276,6 +281,8 @@
     <string name="download_remove_dialog_message">¿Borrar %s de la lista de descargas?</string>
     <string name="download_remove_dialog_message_2">¿Borrar %d galerías de la lista de descargas?</string>
     <string name="download_remove_dialog_check_text">Borrar imágenes</string>
+    <string name="download_reset_reading_progress">Reiniciar progreso de lectura</string>
+    <string name="reset_reading_progress_message">¿Deseas reiniciar el progreso de lectura en todas las galerías?</string>
     <string name="stat_download_action_stop_all">Detener todo</string>
     <string name="drawer_download_label_title">Etiquetas</string>
     <string name="default_download_label_name">Predeterminado</string>
@@ -305,23 +312,6 @@
     <string name="no_history">Las galerías visualizadas se muestran aquí</string>
     <string name="clear_all_history">¿Limpiar historial?</string>
 
-    <!-- Filter -->
-    <string name="filter">Filtros</string>
-    <string name="no_filter">Los filtros se muestran acá</string>
-    <string name="filter_title">Título</string>
-    <string name="filter_uploader">Uploader</string>
-    <string name="filter_tag">Etiqueta</string>
-    <string name="filter_tag_namespace">Etiqueta de espacio de nombres</string>
-    <string name="delete_title_filter">¿Eliminar filtro de título \"%s\"?</string>
-    <string name="delete_uploader_filter">¿Eliminar filtro de uploader \"%s\"?</string>
-    <string name="delete_tag_filter">¿Eliminar filtro de etiquetas \"%s\"?</string>
-    <string name="delete_filter">¿Eliminar filtro \"%s\"?</string>
-    <string name="tip">Sugerencia</string>
-    <string name="add_filter">Añadir filtro</string>
-    <string name="show_definition">Mostrar definición</string>
-    <string name="filter_text">Filtro de texto</string>
-    <string name="filter_tip">Filtro de título: excluye la galería cuyo título contiene la palabra.\n\nFiltro de uploader: excluye las galerías subidas por el uploader.\n\nFiltro de etiquetas: excluye la galería que contiene la etiqueta, toma más tiempo para cargar la lista de galerías.\n\nFiltro de etiqueta de nombre de espacio: excluye la galería que contiene el espacio de nombres de la etiqueta, toma más tiempo para cargar la lista de galerías.</string>
-
     <!-- Set Security -->
     <string name="set_pattern_protection">Establecer protección por patrón</string>
     <string name="set_pattern_protection_tip">Dibuje un patrón para establecer la protección por patrón. \nDéjelo en blanco para quitar la protección por patrón</string>
@@ -343,8 +333,11 @@
     <string name="settings_eh_sign_out_warning">¿Estás seguro de cerrar sesión?</string>
     <string name="settings_eh_sign_out_yes">@android:string/ok</string>
     <string name="settings_eh_sign_out_tip">Sesión cerrada. Reinicie la aplicación para volver iniciar sesión</string>
-	<string name="settings_u_config">Configuración de EHentai</string>
+    <string name="settings_u_config">Configuración de EHentai</string>
     <string name="settings_u_config_summary">Configurar en la página de EHentai</string>
+    <string name="settings_my_tags">Mis etiquetas</string>
+    <string name="settings_my_tags_summary">Ver página de etiquetas en EHentai</string>
+    <string name="settings_eh_launch_page">Página al iniciar aplicación</string>
     <string name="settings_eh_gallery_site">Seleccionar galería</string>
     <string name="settings_eh_list_mode">Modo lista</string>
     <string name="settings_eh_list_mode_detail">Con detalles</string>
@@ -367,11 +360,12 @@
     <string name="settings_eh_excluded_tag_namespaces">Excluir etiquetas espacios de nombres</string>
     <string name="settings_eh_excluded_tag_namespaces_summary">Excluir ciertos espacios de nombres de una búsqueda de etiquetas por defecto</string>
     <string name="settings_eh_show_jpn_title">Mostrar títulos en japonés</string>
+    <string name="settings_eh_show_jpn_title_summary">Es necesario habilitar los títulos en japonés en la propia página de EHentai</string>
     <string name="settings_eh_show_gallery_pages">Mostrar número de páginas de la galería</string>
     <string name="settings_eh_show_gallery_pages_summary">Se verá cuántas páginas tiene una galería</string>
-    <string name="settings_eh_filter">Filtros</string>
-    <string name="settings_eh_filter_summary">Filtrar por titulo, uploader, etiqueta y etiquetas variables</string>
-    <string name="settings_eh_cellular_network_warning">Advertencia de redes moviles</string>
+    <string name="settings_eh_filter">Filtrado de galerías</string>
+    <string name="settings_eh_filter_summary">Filtrado de galerías por título, uploader y etiquetas. Para más detalles presiona el ícono (i) en la parte superior del menú</string>
+    <string name="settings_eh_cellular_network_warning">Advertencia de redes móviles</string>
 
     <string name="settings_read">Lectura</string>
     <string name="settings_read_screen_rotation">Orientación de la pantalla</string>
@@ -383,10 +377,10 @@
     <string name="settings_read_reading_direction_right_to_Left">Derecha a izquierda</string>
     <string name="settings_read_reading_direction_top_to_bottom">Arriba hacia abajo</string>
     <string name="settings_read_page_scaling">Escala de página</string>
-    <string name="settings_read_page_scaling_actual_size">Tamaño actual</string>
-    <string name="settings_read_page_scaling_fit_to_width">Ajustar a lo ancho</string>
-    <string name="settings_read_page_scaling_fit_to_height">Ajustar a la altura</string>
-    <string name="settings_read_page_scaling_fit_to_screen">Ajustar a la pantalla</string>
+    <string name="settings_read_page_scaling_actual_size">Tamaño original</string>
+    <string name="settings_read_page_scaling_fit_to_width">Ajustar a anchura</string>
+    <string name="settings_read_page_scaling_fit_to_height">Ajustar a altura</string>
+    <string name="settings_read_page_scaling_fit_to_screen">Ajustar a pantalla</string>
     <string name="settings_read_page_scaling_fixed_scale">Escala fija</string>
     <string name="settings_read_start_position">Posición de inicio</string>
     <string name="settings_read_start_position_top_left">Arriba a la izquierda</string>
@@ -395,6 +389,7 @@
     <string name="settings_read_start_position_bottom_right">Abajo a la derecha</string>
     <string name="settings_read_start_position_center">Centro</string>
     <string name="settings_read_keep_screen_on">Pantalla siempre encendida</string>
+	<string name="settings_read_show_page_interval">Mostrar intervalo de página</string>
     <string name="settings_read_show_clock">Mostrar hora</string>
     <string name="settings_read_show_progress">Mostrar progreso de lectura</string>
     <string name="settings_read_show_battery">Mostrar porcentaje de la batería</string>
@@ -407,8 +402,8 @@
     <string name="settings_download_download_location">Ruta de descargas</string>
     <string name="settings_download_invalid_download_location">Ruta de descarga invalida</string>
     <string name="settings_download_cant_get_download_location">No se puede obtener ruta de descargas</string>
-    <string name="settings_download_pick_dir_kk">No puedes escribir ningún tipo de datos en tu memoria SD externa en Android 4.4+ a no ser que la hayas hakeado. Pero &lt;SD card&gt;/Android/data/com.hippo.ehviewer es especial, puedes escribir en ello.</string>
-    <string name="settings_download_pick_dir_l">Anroid 5.0+ proporciona una nueva API para escribir en una tarjeta SD externa. Haga click en el boton \"DOCUMENT\" si desea establecer la ruta de descarga en una tarjeta SD.</string>
+    <string name="settings_download_pick_dir_kk">No puedes escribir ningún tipo de datos en tu memoria SD externa en Android 4.4+ a no ser que la hayas hackeado. Pero &lt;SD card&gt;/Android/data/com.hippo.ehviewer es especial, puedes escribir en ello.</string>
+    <string name="settings_download_pick_dir_l">Anroid 5.0+ proporciona una nueva API para escribir en una tarjeta SD externa. Haga clic en el botón \"DOCUMENT\" si desea establecer la ruta de descarga en una tarjeta SD.</string>
     <string name="settings_download_document">Document</string>
     <string name="settings_download_continue">Continuar</string>
     <string name="settings_download_media_scan">Permitir escaneo de medios</string>
@@ -425,7 +420,7 @@
     <string name="settings_download_download_origin_image_summary">¡Cuidado! Podrías recibir error 509</string>
     <string name="settings_download_restore_download_items">Restaurar los elementos de descarga</string>
     <string name="settings_download_restore_download_items_summary">Restaurar todos los elementos de descarga en la ruta de descarga</string>
-    <string name="settings_download_restoring">Restaurando...</string>
+    <string name="settings_download_restoring">Restaurando…</string>
     <string name="settings_download_restore_not_found">No se han encontrado elementos para restaurar</string>
     <string name="settings_download_restore_failed">Restauración fallida</string>
     <string name="settings_download_restore_successfully">Restauración de %d elementos completados</string>
@@ -447,7 +442,7 @@
     <string name="settings_advanced_clear_memory_cache">Borrar caché de memoria</string>
     <string name="settings_advanced_clear_memory_cache_summary">Borrar vistas previas, galerías, información y caché de memoria</string>
     <string name="settings_advanced_read_cache_size">Tamaño del caché (archivos temporales)</string>
-	<string name="settings_advanced_app_language_title">Idioma de la aplicación</string>
+    <string name="settings_advanced_app_language_title">Idioma de la aplicación</string>
     <string name="settings_advanced_proxy">Proxy</string>
     <string name="settings_advanced_proxy_summary_1">%1$s %2$s:%3$d</string>
     <string name="settings_advanced_proxy_summary_2">%1$s</string>
@@ -487,7 +482,7 @@
     <string name="cant_get_data_dir">No se puede obtener el directorio de datos</string>
     <string name="cant_find_any_data">No se pueden encuentran datos</string>
     <string name="cant_read_the_file">No se puede leer el archivo</string>
-	<string name="app_language_system">Lenguaje del sistema (Defecto)</string>
+    <string name="app_language_system">Lenguaje del sistema (Defecto)</string>
 
     <!-- ExcludedLanguagesScene -->
     <string name="excluded_languages">Excluir idiomas</string>
@@ -511,7 +506,7 @@
     <string name="language_portuguese">Portugués</string>
     <string name="language_russian">Ruso</string>
     <string name="language_spanish">Español</string>
-    <string name="language_thai">Tailandes</string>
+    <string name="language_thai">Tailandés</string>
     <string name="language_vietnamese">Vietnamita</string>
     <string name="language_na">N/A</string>
     <string name="language_other">Otros</string>
@@ -608,9 +603,24 @@
     <string name="error_something_wrong_happened">Ocurrió algo malo</string>
     <string name="dialog_archive_title">H@H Downloader</string>
     <string name="settings_privacy">Privacidad</string>
+    <string name="filter">Bloqueo de galerías</string>
+    <string name="no_filter">Las etiquetas bloqueadas se mostrarán acá</string>
+    <string name="filter_title">Título</string>
+    <string name="filter_uploader">Uploader</string>
+    <string name="filter_tag">Etiqueta</string>
+    <string name="filter_tag_namespace">Etiqueta namespace</string>
+    <string name="delete_filter">¿Borrar \"%s\"?</string>
+    <string name="tip">Tip</string>
+    <string name="add_filter">Bloquear etiqueta</string>
+    <string name="filter_the_tag">¿Deseas bloquear la etiqueta \"%s\"?</string>
+    <string name="show_definition">Ver definición de la etiqueta</string>
+    <string name="filter_added">Etiqueta bloqueada</string>
+    <string name="filter_text">Escribe la etiqueta</string>
+    <string name="filter_tip">Este sistema de bloqueo filtrará las galerías de EHentai que contengan la etiqueta especificada acá.\n\nBloqueo de título: excluye las galerías cuyo título contenga la palabra.\n\nBloqueo de uploader: Excluye las galerías que publicadas por el uploader.\n\nBloqueo de etiqueta: excluye galerías que contengan la etiqueta, tomará más tiempo en obtener la lista de galerías.\n\nBloqueo de etiqueta namespace: excluye galerías que contengan la etiqueta namespace, tomará más tiempo en obtener la lista de galerías. Nota: Con namespace quiere decir etiquetas como "male", "female", "misc", entre otros.</string>
+
     <string name="settings_privacy_secure">Impedir capturas de pantalla</string>
     <string name="settings_privacy_secure_summary">Si habilitas esta opción no podrás hacer captura de pantalla y el sistema no mostrará una previsualización en el multitareas.\n\nDeberás reiniciar la aplicación para activar esta función.</string>
-    <string name="page_menu_save_to">Guardar a...</string>
+    <string name="page_menu_save_to">Guardar en…</string>
     <string name="enable_fingerprint">Usar huellas digitales para desbloquear</string>
     <string name="u_config">Ajustes EHentai</string>
     <string name="apply">Aplicar</string>
@@ -627,7 +637,7 @@
     <string name="invalid_host">Anfitrión inválida</string>
     <string name="invalid_ip">IP inválida</string>
     <string name="recaptcha_none">Toca acá</string>
-    <string name="recaptcha_loading">Cargando...</string>
+    <string name="recaptcha_loading">Cargando…</string>
     <string name="recaptcha_failure">Fallado</string>
     <string name="theme_light">Tema claro</string>
     <string name="theme_dark">Tema oscuro</string>
@@ -636,5 +646,5 @@
     <string name="settings_eh_theme_light">Claro</string>
     <string name="settings_eh_theme_dark">Oscuro</string>
     <string name="settings_eh_theme_black">Negro</string>
-	
+
 </resources>

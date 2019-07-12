@@ -168,6 +168,10 @@ public class SearchLayout extends EasyRecyclerView implements CompoundButton.OnC
         mImageView.setImageUri(imageUri);
     }
 
+    public void setNormalSearchMode(int id) {
+        mNormalSearchMode.check(id);
+    }
+
     @Override
     public void onSelectImage() {
         if (mHelper != null) {
@@ -243,6 +247,9 @@ public class SearchLayout extends EasyRecyclerView implements CompoundButton.OnC
                     case R.id.search_normal_search:
                         urlBuilder.setMode(ListUrlBuilder.MODE_NORMAL);
                         break;
+                    case R.id.search_subscription_search:
+                        urlBuilder.setMode(ListUrlBuilder.MODE_SUBSCRIPTION);
+                        break;
                     case R.id.search_specify_uploader:
                         urlBuilder.setMode(ListUrlBuilder.MODE_UPLOADER);
                         break;
@@ -255,6 +262,8 @@ public class SearchLayout extends EasyRecyclerView implements CompoundButton.OnC
                 if (mEnableAdvance) {
                     urlBuilder.setAdvanceSearch(mTableAdvanceSearch.getAdvanceSearch());
                     urlBuilder.setMinRating(mTableAdvanceSearch.getMinRating());
+                    urlBuilder.setPageFrom(mTableAdvanceSearch.getPageFrom());
+                    urlBuilder.setPageTo(mTableAdvanceSearch.getPageTo());
                 }
                 break;
             case SEARCH_MODE_IMAGE:
